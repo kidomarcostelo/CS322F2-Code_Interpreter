@@ -1,4 +1,4 @@
-BEGIN CODE
-INT x
-INT x
+BEGIN CODE 
+    INT x = 5, y, x = 6
+    FLOAT x = true
 END CODE
