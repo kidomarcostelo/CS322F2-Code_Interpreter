@@ -33,5 +33,13 @@
     "**/.vscode",
     "**/.vscode/**"
   ],
-  "C_Cpp_Runner.useAddressSanitizer": false
+  "C_Cpp_Runner.useAddressSanitizer": false,
+
+  "antlr4.generation": {
+    "mode": "internal",
+    "language": "CSharp",
+    "listeners": false,
+    "visitors": true
+}
+  
 }
