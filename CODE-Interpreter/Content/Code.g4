@@ -1,50 +1,70 @@
 grammar Code;
 
 program:
-        BEGIN_CODE statement* NEWLINE END_CODE EOF;
+        BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement:  NEWLINE (initialization COMMENT?) | COMMENT;
+statement: declaration* (declaration+ executable*);
 
-initialization 
-    : DATA_TYPE (COMMA? assignment)+;
-    //: DATA_TYPE ((COMMA? assignment)+ | (COMMA? declarations)+)+;
+declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
 
+initialization: DATA_TYPE (COMMA? assignment)+;
 
-declarations: IDENTIFIER;
+assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-assignment: IDENTIFIER | IDENTIFIER EQUALS expression; 
+executable: NEWLINE (expression COMMENT?) | COMMENT;
 
 expression
     : constant                          #constantExpression
     | IDENTIFIER                        #identifierExpression
+    | IDENTIFIER equalsOp expression    #equalsExpression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
     | expression compareOp expression   #comparativeExpression
     ;
 
-NEWLINE: ('\r\n')+;
-//WHITESPACE: (' '|'\t')+ -> skip ;
-TAB: '\t';
-
-
-BEGIN_CODE: 'BEGIN CODE';
-END_CODE: 'END CODE';
-DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
-constant: INTEGER | FLOAT | CHAR | BOOL;
-
-multOp: '*' | '/' ;
+// operations
+multOp: '*' | '/' ; 
 addOp: '+' | '-' ;
 compareOp: '==' ;
+equalsOp: EQUALS; 
+logicOp: 'AND' | 'OR' | 'NOT';
 
+constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL;
 
+// control flow structures
+fragment IF: 'IF';
+fragment ELSE: 'ELSE';
+
+CONDITIONAL: IF | (ELSE ' ' IF) | ELSE;
+LOOP: 'WHILE';
+
+// tokens
+NEWLINE: ('\r\n');
+TAB: '\t';
+
+fragment BEGIN: 'BEGIN';
+fragment END: 'END';
+fragment CODE: 'CODE';
+
+BEGIN_CODE: BEGIN ' ' CODE;
+END_CODE: END ' ' CODE;
+DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
+
+// value equivalents
+BOOLVAL: 'TRUE' | 'FALSE';
+INTEGERVAL: [0-9]+;
+FLOATVAL: [0-9]+'.'[0-9]+;
+CHARVAL: '\''[a-zA-Z] '\''; 
+
+// reserve words
+RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
+    LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
+    
 IDENTIFIER: [a-zA-Z_][a-zA-Z_]*;
-BOOL: 'TRUE' | 'FALSE';
-INTEGER: [0-9]+;
-FLOAT: [0-9]+'.'[0-9]+;
-CHAR: [a-zA-Z];
 
 EQUALS: '=';
 COMMA: ',';
 
 COMMENT: '#' ~[\r\n]* NEWLINE? -> skip;
+

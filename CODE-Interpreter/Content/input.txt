@@ -1,4 +1,8 @@
-BEGIN CODE 
+BEGIN CODE
     INT x = 5, y, x = 6
-    FLOAT x = true
+    CHAR F = 'c'
+    BOOL x = TRUE
+    FLOAT x=y=z=6.6
+    x = 6
+    c = TRUE
 END CODE
