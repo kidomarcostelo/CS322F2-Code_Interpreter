@@ -12,6 +12,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null;
     }
 
+    // recognize variable
+    public override object VisitDeclaration(CodeParser.DeclarationContext context)
+    {
+        return VisitChildren(context)!;
+    }
+
     public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
         var varName = context.IDENTIFIER().GetText();
@@ -22,6 +28,4 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return null;
     }
-
-    
 }
