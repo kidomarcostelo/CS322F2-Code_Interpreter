@@ -7,7 +7,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private Dictionary<string, object?> Variables { get; } = new();
     
-    private Dictionary<string, object> variables = new Dictionary<string, object>(); // temp
+    private Dictionary<string, object> variables = new Dictionary<string, object>(); // temporary storage
 
     public override object VisitProgram([NotNull] CodeParser.ProgramContext context)
     {
@@ -44,7 +44,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var varName = context.IDENTIFIER().GetText();
 
-        var value = Visit(context.expression());
+        var value = Visit(context.expression()[0]); // temporary fix
 
         Variables[varName] = value;
 
