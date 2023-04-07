@@ -130,4 +130,142 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return null!;
     }
+
+    public override object VisitConstant(CodeParser.ConstantContext context)
+    {
+        if (context.INTEGERVAL() != null)
+        {
+            return int.Parse(context.INTEGERVAL().GetText());
+        }
+        if (context.FLOATVAL() != null)
+        {
+            return float.Parse(context.FLOATVAL().GetText());
+        }
+        if (context.CHARVAL() != null)
+        {
+            return context.CHARVAL().GetText();
+        }
+        if (context.BOOLVAL() != null)
+        {
+            return context.BOOLVAL().GetText() == "TRUE";
+        }
+        
+        return null;
+    }
+
+    public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+
+        var op = context.addOp().GetText();
+
+        return op switch
+        {
+            "+" => Add(left, right),
+            "-" => Subtract(left, right),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    public override object VisitMultiplicativeExpression([NotNull] CodeParser.MultiplicativeExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+
+        var op = context.multOp().GetText();
+
+        return op switch
+        {
+            "*" => Multiply(left, right),
+            "/" => Divide(left, right),
+            "%" => Modulo(left, right),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    private object? Add (object? left, object? right)
+    {
+        if (left is int l && right is int r)
+            return l + r;
+        
+        if (left is float lf && right is float rf)
+            return lf + rf;
+        
+        if (left is int lInt && right is float rFloat)
+            return lInt + rFloat;
+        
+        if (left is float lFLoat && right is int rInt)
+            return lFLoat + rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private object? Subtract (object? left, object? right)
+    {
+        if (left is int l && right is int r)
+            return l - r;
+        
+        if (left is float lf && right is float rf)
+            return lf - rf;
+        
+        if (left is int lInt && right is float rFloat)
+            return lInt - rFloat;
+        
+        if (left is float lFLoat && right is int rInt)
+            return lFLoat - rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private object? Multiply (object? left, object? right)
+    {
+        if (left is int l && right is int r)
+            return l * r;
+        
+        if (left is float lf && right is float rf)
+            return lf * rf;
+        
+        if (left is int lInt && right is float rFloat)
+            return lInt * rFloat;
+        
+        if (left is float lFLoat && right is int rInt)
+            return lFLoat * rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private object? Divide (object? left, object? right)
+    {
+        if (left is int l && right is int r)
+            return l / r;
+        
+        if (left is float lf && right is float rf)
+            return lf / rf;
+        
+        if (left is int lInt && right is float rFloat)
+            return lInt / rFloat;
+        
+        if (left is float lFLoat && right is int rInt)
+            return lFLoat / rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private object? Modulo (object? left, object? right)
+    {
+        if (left is int l && right is int r)
+            return l % r;
+        
+        if (left is float lf && right is float rf)
+            return lf % rf;
+        
+        if (left is int lInt && right is float rFloat)
+            return lInt % rFloat;
+        
+        if (left is float lFLoat && right is int rInt)
+            return lFLoat % rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
 }
