@@ -3,11 +3,11 @@ grammar Code;
 program:
         BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: declaration* (declaration+ executable*);
+statement: (declaration* (declaration+ executable*)) | NEWLINE functionCall;
 
 declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
 
-initialization: DATA_TYPE (COMMA? assignment)+ | functionCall ;
+initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
