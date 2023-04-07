@@ -1,17 +1,20 @@
 using Antlr4.Runtime.Misc;
 using CODE_Interpreter.Content;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace CODE_Interpreter;
 
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private Dictionary<string, object?> Variables { get; } = new();
-    
+
+    private Dictionary<string, object?> Functions { get; } = new();
+
     private Dictionary<string, object> variables = new Dictionary<string, object>(); // temporary storage
 
     public CodeVisitor()
     {
-        Variables["DISPLAY:"] = new Func<object?[], object?>(Display);
+        Functions["DISPLAY:"] = new Func<object?[], object?>(Display);
     }
 
     private object? Display(object?[] args)
@@ -29,16 +32,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         var name = context.DISPLAY().GetText();
         var args = context.expression().children.Select(Visit).ToArray();
 
-        if (!Variables.ContainsKey(name))
+        if (!Functions.ContainsKey(name))
         {
             throw new Exception($"Function {name} is not defined.");
         }
 
-        if (Variables[name] is not Func<object?[], object?> func)
+        if (Functions[name] is not Func<object?[], object?> func)
         {
             throw new Exception($"Variable {name} is not a function.");
         }
-
         return func(args);
     }
 
