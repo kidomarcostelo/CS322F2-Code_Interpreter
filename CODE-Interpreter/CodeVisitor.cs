@@ -18,7 +18,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         foreach (var arg in args)
         {
-            Console.WriteLine(arg);
+            Console.Write(arg);
         }
         return null;
     }
@@ -179,6 +179,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             "%" => Modulo(left, right),
             _ => throw new NotImplementedException()
         };
+    }
+
+    public override object VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        return $"{left}{right}";
     }
 
     private object? Add (object? left, object? right)
