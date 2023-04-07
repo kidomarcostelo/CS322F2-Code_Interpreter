@@ -7,10 +7,7 @@ namespace CODE_Interpreter;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private Dictionary<string, object?> Variables { get; } = new();
-
     private Dictionary<string, object?> Functions { get; } = new();
-
-    private Dictionary<string, object> variables = new Dictionary<string, object>(); // temporary storage
 
     public CodeVisitor()
     {
@@ -73,7 +70,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             foreach(var expression in expressions) {
                 object value = Visit(expression)!;
 
-                variables.Add(variableName, value!);
+                Variables.Add(variableName, value!);
             }
         }
 
@@ -110,9 +107,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         string variableName = context.IDENTIFIER().GetText();
 
-        if (variables.ContainsKey(variableName))
+        if (Variables.ContainsKey(variableName))
         {
-            return variables[variableName];
+            return Variables[variableName]!;
         }
         else
         {
