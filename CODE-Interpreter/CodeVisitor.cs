@@ -188,6 +188,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return $"{left}{right}";
     }
 
+    public override object VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
+    {
+        return "\n";
+    }
+
     private object? Add (object? left, object? right)
     {
         if (left is int l && right is int r)
