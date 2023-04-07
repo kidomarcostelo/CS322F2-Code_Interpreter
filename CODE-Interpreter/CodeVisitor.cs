@@ -48,7 +48,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     }
 
     // recognize variable
-    public override object VisitDeclaration(CodeParser.DeclarationContext context)
+    public override object VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
     {
         if (context.initialization != null)
         {
@@ -58,7 +58,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null!;
     }
 
-    public override object VisitInitialization(CodeParser.InitializationContext context)
+    public override object VisitInitialization([NotNull] CodeParser.InitializationContext context)
     {
         string dataType = context.DATA_TYPE().GetText();
         var assignments = context.assignment();
@@ -76,6 +76,32 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
 
     return null!;
+    }
+
+    public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
+    {
+        string valueString = context.GetText();
+        object value = null!;
+
+        // Convert value to i'ts type
+        if (valueString == "TRUE" || valueString == "FALSE")
+        {
+            value = bool.Parse(valueString);
+        }
+        else if (int.TryParse(valueString, out int intValue))
+        {
+            value = intValue;
+        }
+        else if (float.TryParse(valueString, out float floatValue))
+        {
+            value = floatValue;
+        }
+        else if (valueString.Length == 3 && valueString[0] == '\'' && valueString[2] == '\'')
+        {
+            value = valueString[1];
+        }
+
+        return value;
     }
 
     public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
