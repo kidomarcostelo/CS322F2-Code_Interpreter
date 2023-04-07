@@ -24,12 +24,19 @@ expression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
     | expression compareOp expression   #comparativeExpression
-    ;
+    ;   
 
 // operations
-multOp: '*' | '/' ; 
+multOp: '*' | '/' | '%'; 
 addOp: '+' | '-' ;
-compareOp: '==' ;
+compareOp
+    : '=='  // equal
+    | '>'   // greater than
+    | '<'   // lesser than
+    | '>='  // greater than or equal to
+    | '<='  // lesser than or equal to
+    | '<>'  // not equal
+    ;
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
 
@@ -59,7 +66,7 @@ BOOLVAL: 'TRUE' | 'FALSE';
 INTEGERVAL: [0-9]+;
 FLOATVAL: [0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
-STRINGVAL: '"' .* '"'; 
+STRINGVAL: '"' (.*?) '"'; 
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
@@ -73,4 +80,3 @@ EQUALS: '=';
 COMMA: ',';
 
 COMMENT: NEWLINE? '#' ~[\r?\n]* ? -> channel(HIDDEN);
-
