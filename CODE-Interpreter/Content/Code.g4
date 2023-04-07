@@ -7,7 +7,7 @@ statement: declaration* (declaration+ executable*);
 
 declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
 
-initialization: DATA_TYPE (COMMA? assignment)+ | functionCall;
+initialization: DATA_TYPE (COMMA? assignment)+ | functionCall ;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
