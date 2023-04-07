@@ -13,10 +13,13 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE (expression COMMENT?) | COMMENT;
 
+functionCall: DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*;
+
 expression
     : constant                          #constantExpression
     | IDENTIFIER                        #identifierExpression
     | IDENTIFIER equalsOp expression    #equalsExpression
+    | functionCall						#functionCallExpression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
@@ -62,6 +65,8 @@ RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
     LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
     
 IDENTIFIER: [a-zA-Z_][a-zA-Z_]*;
+DISPLAY: 'DISPLAY:';
+SCAN: 'SCAN:';
 
 EQUALS: '=';
 COMMA: ',';

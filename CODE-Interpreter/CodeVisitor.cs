@@ -9,6 +9,39 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     
     private Dictionary<string, object> variables = new Dictionary<string, object>(); // temporary storage
 
+    public CodeVisitor()
+    {
+        Variables["DISPLAY:"] = new Func<object?[], object?>(Display);
+    }
+
+    private object? Display(object?[] args)
+    {
+        foreach (var arg in args)
+        {
+            Console.WriteLine(arg);
+        }
+        return null;
+    }
+
+
+    public override object? VisitFunctionCall([NotNull] CodeParser.FunctionCallContext context)
+    {
+        var name = context.DISPLAY().GetText();
+        var args = context.expression().children.Select(Visit).ToArray();
+
+        if (!Variables.ContainsKey(name))
+        {
+            throw new Exception($"Function {name} is not defined.");
+        }
+
+        if (Variables[name] is not Func<object?[], object?> func)
+        {
+            throw new Exception($"Variable {name} is not a function.");
+        }
+
+        return func(args);
+    }
+
     public override object VisitProgram([NotNull] CodeParser.ProgramContext context)
     {
         return null!;
