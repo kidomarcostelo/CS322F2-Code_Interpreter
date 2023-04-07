@@ -104,6 +104,20 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return value;
     }
 
+    public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    {
+        string variableName = context.IDENTIFIER().GetText();
+
+        if (variables.ContainsKey(variableName))
+        {
+            return variables[variableName];
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", variableName));
+        }
+    }
+
     public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
         var varName = context.IDENTIFIER().GetText();
