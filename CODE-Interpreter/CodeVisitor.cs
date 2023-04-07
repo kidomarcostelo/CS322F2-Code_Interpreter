@@ -11,13 +11,18 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object VisitProgram([NotNull] CodeParser.ProgramContext context)
     {
-        return null;
+        return null!;
     }
 
     // recognize variable
     public override object VisitDeclaration(CodeParser.DeclarationContext context)
     {
-        return VisitChildren(context)!;
+        if (context.initialization != null)
+        {
+            return VisitChildren(context)!;
+        }
+
+        return null!;
     }
 
     public override object VisitInitialization(CodeParser.InitializationContext context)
@@ -48,6 +53,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         Variables[varName] = value;
 
-        return null;
+        return null!;
     }
 }
