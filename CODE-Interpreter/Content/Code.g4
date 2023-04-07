@@ -3,7 +3,7 @@ grammar Code;
 program:
         BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: ((declaration | NEWLINE functionCall)* (declaration+ (executable | NEWLINE functionCall)*))* ;
+statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
 
 declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
 
@@ -13,7 +13,7 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE (expression COMMENT?) | COMMENT;
 
-functionCall: DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*;
+functionCall: NEWLINE (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
 expression
     : constant                          #constantExpression
@@ -33,7 +33,7 @@ compareOp: '==' ;
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
 
-constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL;
+constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 
 // control flow structures
 fragment IF: 'IF';
@@ -59,6 +59,7 @@ BOOLVAL: 'TRUE' | 'FALSE';
 INTEGERVAL: [0-9]+;
 FLOATVAL: [0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
+STRINGVAL: '"' .* '"'; 
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
