@@ -71,5 +71,5 @@ SCAN: 'SCAN:';
 EQUALS: '=';
 COMMA: ',';
 
-COMMENT: '#' ~[\r\n]* NEWLINE? -> skip;
+COMMENT: NEWLINE? '#' ~[\r?\n]* ? -> channel(HIDDEN);
 
