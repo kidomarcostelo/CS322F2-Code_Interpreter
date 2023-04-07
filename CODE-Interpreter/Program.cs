@@ -16,7 +16,9 @@ static class Program
         // Application.Run(new Form1());
 
 
-        var filename = "Content\\input.txt";
+
+        var baseDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
+        var filename = $@"{baseDirectory}\Content\input.txt";
 
         var code = File.ReadAllText(filename);
         Console.WriteLine(code);
