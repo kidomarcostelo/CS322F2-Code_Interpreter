@@ -3,7 +3,7 @@ grammar Code;
 program:
         BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: declaration* (declaration+ executable*);
+statement: (declaration* (declaration+ executable*)) | NEWLINE functionCall;
 
 declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
 
