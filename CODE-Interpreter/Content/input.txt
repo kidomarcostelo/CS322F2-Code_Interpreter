@@ -1,5 +1,3 @@
 BEGIN CODE
 	DISPLAY: "Hello World"
-	DISPLAY: "Hello World"
-	DISPLAY: "Hello World"
 END CODE
