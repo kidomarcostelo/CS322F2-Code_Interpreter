@@ -23,7 +23,10 @@ expression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
+    | expression concat expression		#concatExpression
     | expression compareOp expression   #comparativeExpression
+    | newline                           #newlineExpression
+    | expression escape expression      #escapeExpression
     ;   
 
 // operations
@@ -39,6 +42,9 @@ compareOp
     ;
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
+concat: '&';
+newline: '$';
+escape: '[' ']';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 
