@@ -15,11 +15,11 @@ static class Program
         // ApplicationConfiguration.Initialize();
         // Application.Run(new Form1());
 
-        var filename = "Contenxt\\input.txt";
+        var filename = "Content\\input.txt";
 
         var code = File.ReadAllText(filename);
-        Console.WriteLine(code);
-
+        Console.WriteLine("In console");
+        
         var inputStream = new AntlrInputStream(code);
         var codeLexer = new CodeLexer(inputStream);
         var commonTokenStream = new CommonTokenStream(codeLexer);
