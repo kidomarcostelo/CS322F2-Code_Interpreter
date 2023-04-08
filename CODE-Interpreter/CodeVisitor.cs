@@ -1,9 +1,6 @@
 using Antlr4.Runtime.Misc;
 using CODE_Interpreter.Content;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace CODE_Interpreter;
-
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private Dictionary<string, object?> Variables { get; } = new();
@@ -41,11 +38,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return func(args);
     }
 
-    public override object VisitProgram([NotNull] CodeParser.ProgramContext context)
-    {
-        return null!;
-    }
-
     // recognize variable
     public override object VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
     {
@@ -77,6 +69,32 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     return null!;
     }
 
+    public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
+    {
+        var variableName = context.IDENTIFIER().GetText();
+        var expressions = context.expression();
+        foreach (var expression in expressions)
+        {
+            object value = Visit(expression)!;
+            Variables[variableName] = value;
+        }
+        return null;
+    }
+
+    public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    {
+        string variableName = context.IDENTIFIER().GetText();
+
+        if (Variables.ContainsKey(variableName))
+        {
+            return Variables[variableName]!;
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", variableName));
+        }
+    }
+
     public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         string valueString = context.GetText();
@@ -103,51 +121,21 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return value;
     }
 
-    public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    public override object? VisitConstant(CodeParser.ConstantContext context)
     {
-        string variableName = context.IDENTIFIER().GetText();
+        if (context.INTEGERVAL() is { } i)
+            return int.Parse(i.GetText());
 
-        if (Variables.ContainsKey(variableName))
-        {
-            return Variables[variableName]!;
-        }
-        else
-        {
-            throw new Exception(string.Format("Undefined variable '{0}'", variableName));
-        }
-    }
+        if (context.FLOATVAL() is { } f)
+            return float.Parse(f.GetText());
 
-    public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
-    {
-        var varName = context.IDENTIFIER().GetText();
+        if (context.STRINGVAL() is { } s)
+            return s.GetText()[1..^1];
 
-        var value = Visit(context.expression()[0]); // temporary fix
+        if (context.BOOLVAL() is { } b)
+            return b.GetText() == "true";
 
-        Variables[varName] = value;
-
-        return null!;
-    }
-
-    public override object VisitConstant(CodeParser.ConstantContext context)
-    {
-        if (context.INTEGERVAL() != null)
-        {
-            return int.Parse(context.INTEGERVAL().GetText());
-        }
-        if (context.FLOATVAL() != null)
-        {
-            return float.Parse(context.FLOATVAL().GetText());
-        }
-        if (context.CHARVAL() != null)
-        {
-            return context.CHARVAL().GetText();
-        }
-        if (context.BOOLVAL() != null)
-        {
-            return context.BOOLVAL().GetText() == "TRUE";
-        }
-        
-        return null;
+        throw new NotImplementedException();
     }
 
     public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)

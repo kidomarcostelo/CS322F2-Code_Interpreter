@@ -1,7 +1,6 @@
 grammar Code;
 
-program:
-        BEGIN_CODE statement NEWLINE END_CODE EOF;
+program: BEGIN_CODE statement NEWLINE END_CODE EOF;
 
 statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
 
