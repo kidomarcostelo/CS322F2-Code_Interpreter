@@ -5,15 +5,15 @@ program:
 
 statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
 
-declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
+declaration:  NEWLINE TAB (initialization COMMENT?) | COMMENT;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE (expression COMMENT?) | COMMENT;
+executable: NEWLINE TAB(expression COMMENT?) | COMMENT;
 
-functionCall: NEWLINE (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
 expression
     : constant                          #constantExpression
