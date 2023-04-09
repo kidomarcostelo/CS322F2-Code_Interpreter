@@ -10,6 +10,13 @@ namespace CODE_Interpreter
     {
         public string? DataType { get; set; }
         public string? Identifier { get; set; }
-        public object? Value { get; set; } 
+        public object? Value { get; set; }
+
+        public Variable(string datatype, string identifier, object value)
+        {     
+            DataType = datatype;
+            Identifier = identifier;
+            Value = value;
+        }
     }
 }

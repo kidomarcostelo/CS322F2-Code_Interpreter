@@ -1,8 +1,10 @@
 using Antlr4.Runtime.Misc;
+using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
+    private List<Variable> _variables = new List<Variable>();
     private Dictionary<string, object?> Variables { get; } = new();
     private Dictionary<string, object?> Functions { get; } = new();
 
