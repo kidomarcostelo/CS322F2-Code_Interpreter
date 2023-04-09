@@ -1,3 +1,4 @@
 BEGIN CODE
-	DISPLAY: "Hello World"
+	INT INT = 5
+	DISPLAY: INT
 END CODE

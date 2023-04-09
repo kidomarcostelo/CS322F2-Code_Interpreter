@@ -1,9 +1,12 @@
 using Antlr4.Runtime.Misc;
+using CODE_Interpreter;
 using CODE_Interpreter.Content;
+using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
-    private Dictionary<string, object?> Variables { get; } = new();
+    private List<Variable> _variables = new List<Variable>();
     private Dictionary<string, object?> Functions { get; } = new();
 
     public CodeVisitor()
@@ -52,46 +55,117 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     public override object VisitInitialization([NotNull] CodeParser.InitializationContext context)
     {
         string dataType = context.DATA_TYPE().GetText();
-        var assignments = context.assignment();
+        IList<CodeParser.AssignmentContext> assignments = context.assignment();
 
-        foreach(var assignment in assignments)
+        foreach (CodeParser.AssignmentContext assignment in assignments)
         {
-            string variableName = assignment.IDENTIFIER().GetText();
+            string identifier = assignment.IDENTIFIER().GetText();
             var expressions = assignment.expression();
+            Variable existingVar = null!;
 
-            foreach(var expression in expressions) {
-                object value = Visit(expression)!;
+            if (identifier == "INT" || identifier == "FLOAT" || identifier == "BOOL" || identifier == "CHAR" ||
+                identifier == "IF" || identifier == "ELSE" || identifier == "LOOP" || identifier == "BEGIN" ||
+                identifier == "END" || identifier == "CODE" || identifier == "DISPLAY" || identifier == "SCAN" ||
+                identifier == "BEGIN IF")
+            {
+                throw new Exception($"Temp => Bawal Reserved Word as Identifier");
+            }
 
-                Variables.Add(variableName, value!);
+            foreach (var expression in expressions)
+            {
+                var value = Visit(expression)!;
+
+                if (_variables.Any(p => p.Identifier == identifier))
+                {
+                    existingVar = new Variable { DataType = existingVar.DataType, Identifier = existingVar.Identifier, Value = value };
+                }
+                else
+                {
+                    existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
+                }
+
+                if (existingVar.DataType == "INT")
+                {
+                    if (value is int)
+                    {
+
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to an INT variable.");
+                    }
+                }
+                else if (existingVar.DataType == "FLOAT")
+                {
+                    if (value is float)
+                    {
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a FLOAT variable.");
+                    }
+                }
+                else if (existingVar.DataType == "CHAR")
+                {
+                    if (value is char)
+                    {
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a CHAR variable.");
+                    }
+                }
+                else if (existingVar.DataType == "BOOL")
+                {
+                    if (value is bool)
+                    {
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
+                    }
+                }
             }
         }
 
-    return null!;
+        return null!;
     }
 
-    public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
-    {
-        var variableName = context.IDENTIFIER().GetText();
-        var expressions = context.expression();
-        foreach (var expression in expressions)
-        {
-            object value = Visit(expression)!;
-            Variables[variableName] = value;
-        }
-        return null;
-    }
+    //public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
+    //{
+    //    var varName = context.IDENTIFIER().GetText();
+
+    //    var expressions = context.expression();
+
+    //    foreach (var expression in expressions)
+    //    {
+    //        object value = Visit(expression);
+
+    //        _variables.Add(v => v.Value = value, v.Identifier = .....);
+    //    }
+
+    //    return null!;
+    //}
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
-        string variableName = context.IDENTIFIER().GetText();
+        string identifier = context.IDENTIFIER().GetText();
 
-        if (Variables.ContainsKey(variableName))
+        if (_variables.Any(p => p.Identifier == identifier))
         {
-            return Variables[variableName]!;
+            return _variables.Find(p => p.Identifier == identifier)!;
         }
         else
         {
-            throw new Exception(string.Format("Undefined variable '{0}'", variableName));
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
         }
     }
 
