@@ -64,8 +64,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             Variable existingVar = null!;
 
             if (identifier == "INT" || identifier == "FLOAT" || identifier == "BOOL" || identifier == "CHAR" ||
-                identifier == "IF" || identifier == "ELSE" || identifier == "LOOP" || identifier == "BEGIN" || 
-                identifier == "END" || identifier == "CODE" || identifier == "DISPLAY" || identifier == "SCAN" || 
+                identifier == "IF" || identifier == "ELSE" || identifier == "LOOP" || identifier == "BEGIN" ||
+                identifier == "END" || identifier == "CODE" || identifier == "DISPLAY" || identifier == "SCAN" ||
                 identifier == "BEGIN IF")
             {
                 throw new Exception($"Temp => Bawal Reserved Word as Identifier");
@@ -74,8 +74,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             foreach (var expression in expressions)
             {
                 var value = Visit(expression)!;
-                
-                existingVar = new Variable(dataType, identifier, value);
+
+                existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value};
 
                 if (existingVar != null)
                 {
@@ -83,8 +83,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                     {
                         if (value is int)
                         {
-                            
+
                             _variables.Add(existingVar);
+                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                         }
                         else
                         {
@@ -96,6 +97,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         if (value is float)
                         {
                             _variables.Add(existingVar);
+                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                         }
                         else
                         {
@@ -107,6 +109,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         if (value is char)
                         {
                             _variables.Add(existingVar);
+                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                         }
                         else
                         {
@@ -118,6 +121,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         if (value is bool)
                         {
                             _variables.Add(existingVar);
+                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                         }
                         else
                         {
@@ -130,7 +134,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                     throw new Exception($"Temp '{value}' Temp.");
                 }
             }
-            Console.WriteLine(identifier);
         }
 
         return null!;
