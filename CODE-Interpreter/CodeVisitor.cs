@@ -68,7 +68,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 identifier == "END" || identifier == "CODE" || identifier == "DISPLAY" || identifier == "SCAN" ||
                 identifier == "BEGIN IF")
             {
-                throw new Exception($"Temp => Bawal Reserved Word as Identifier");
+                throw new Exception($"Error: '{identifier}' is a Reserved Word and cannot be used as Variable Name.");
             }
 
             foreach (var expression in expressions)
@@ -77,7 +77,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
                 if (_variables.Any(p => p.Identifier == identifier))
                 {
-                    existingVar = new Variable { DataType = existingVar.DataType, Identifier = existingVar.Identifier, Value = value };
+                    throw new Exception($"Error: Variable Name '{identifier}' has been already initialized.");
                 }
                 else
                 {
