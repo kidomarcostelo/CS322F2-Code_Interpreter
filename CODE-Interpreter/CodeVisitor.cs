@@ -1,6 +1,7 @@
 using Antlr4.Runtime.Misc;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
+using System.ComponentModel.DataAnnotations;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
@@ -54,33 +55,147 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     public override object VisitInitialization([NotNull] CodeParser.InitializationContext context)
     {
         string dataType = context.DATA_TYPE().GetText();
-        var assignments = context.assignment();
+        IList<CodeParser.AssignmentContext> assignments = context.assignment();
 
-        foreach(var assignment in assignments)
+        foreach (CodeParser.AssignmentContext assignment in assignments)
         {
-            string variableName = assignment.IDENTIFIER().GetText();
+            string identifier = assignment.IDENTIFIER().GetText();
             var expressions = assignment.expression();
+            Variable existingVar = null!;
 
-            foreach(var expression in expressions) {
-                object value = Visit(expression)!;
+            foreach (var expression in expressions)
+            {
+                var value = Visit(expression)!;
+                
+                existingVar = new Variable(dataType, identifier, value);
 
-                Variables.Add(variableName, value!);
+                if (existingVar != null)
+                {
+                    if (existingVar.DataType == "INT")
+                    {
+                        if (value is int)
+                        {
+                            
+                            _variables.Add(existingVar);
+                        }
+                        else
+                        {
+                            throw new Exception($"Error: Value '{value}' cannot be assigned to an INT variable.");
+                        }
+                    }
+                    else if (existingVar.DataType == "FLOAT")
+                    {
+                        if (value is float)
+                        {
+                            _variables.Add(existingVar);
+                        }
+                        else
+                        {
+                            throw new Exception($"Error: Value '{value}' cannot be assigned to a FLOAT variable.");
+                        }
+                    }
+                    else if (existingVar.DataType == "CHAR")
+                    {
+                        if (value is char)
+                        {
+                            _variables.Add(existingVar);
+                        }
+                        else
+                        {
+                            throw new Exception($"Error: Value '{value}' cannot be assigned to a CHAR variable.");
+                        }
+                    }
+                    else if (existingVar.DataType == "BOOL")
+                    {
+                        if (value is bool)
+                        {
+                            _variables.Add(existingVar);
+                        }
+                        else
+                        {
+                            throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
+                        }
+                    }
+                }
+                else
+                {
+                    throw new Exception($"Temp '{value}' Temp.");
+                }
             }
+            Console.WriteLine(identifier);
         }
 
-    return null!;
+        return null!;
     }
 
     public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
-        var variableName = context.IDENTIFIER().GetText();
+        var identifier = context.IDENTIFIER().GetText();
         var expressions = context.expression();
+        Variable existingVar = null!;
+
+        foreach(var variable in _variables)
+        {
+            if(variable.Identifier == identifier)
+            {
+                existingVar = variable;
+            }
+        }
+
         foreach (var expression in expressions)
         {
             object value = Visit(expression)!;
-            Variables[variableName] = value;
+
+            if (existingVar != null)
+            {
+                if (existingVar.DataType == "INT")
+                {
+                    if (value is int)
+                    {
+
+                        _variables.Add(existingVar);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to an INT variable.");
+                    }
+                }
+                else if (existingVar.DataType == "FLOAT")
+                {
+                    if (value is float)
+                    {
+                        Variables.Add(identifier, value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a FLOAT variable.");
+                    }
+                }
+                else if (existingVar.DataType == "CHAR")
+                {
+                    if (value is char)
+                    {
+                        Variables.Add(identifier, value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a CHAR variable.");
+                    }
+                }
+                else if (existingVar.DataType == "BOOL")
+                {
+                    if (value is bool)
+                    {
+                        Variables.Add(identifier, value);
+                    }
+                    else
+                    {
+                        throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
+                    }
+                }
+            }
         }
-        return null;
+        return null!;
     }
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
