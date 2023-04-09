@@ -2,11 +2,11 @@ using Antlr4.Runtime.Misc;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
-    private Dictionary<string, object?> Variables { get; } = new();
     private Dictionary<string, object?> Functions { get; } = new();
 
     public CodeVisitor()
@@ -75,96 +75,22 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             {
                 var value = Visit(expression)!;
 
-                existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value};
-
-                if (existingVar != null)
+                if (_variables.Any(p => p.Identifier == identifier))
                 {
-                    if (existingVar.DataType == "INT")
-                    {
-                        if (value is int)
-                        {
-
-                            _variables.Add(existingVar);
-                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                        }
-                        else
-                        {
-                            throw new Exception($"Error: Value '{value}' cannot be assigned to an INT variable.");
-                        }
-                    }
-                    else if (existingVar.DataType == "FLOAT")
-                    {
-                        if (value is float)
-                        {
-                            _variables.Add(existingVar);
-                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                        }
-                        else
-                        {
-                            throw new Exception($"Error: Value '{value}' cannot be assigned to a FLOAT variable.");
-                        }
-                    }
-                    else if (existingVar.DataType == "CHAR")
-                    {
-                        if (value is char)
-                        {
-                            _variables.Add(existingVar);
-                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                        }
-                        else
-                        {
-                            throw new Exception($"Error: Value '{value}' cannot be assigned to a CHAR variable.");
-                        }
-                    }
-                    else if (existingVar.DataType == "BOOL")
-                    {
-                        if (value is bool)
-                        {
-                            _variables.Add(existingVar);
-                            Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                        }
-                        else
-                        {
-                            throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
-                        }
-                    }
+                    existingVar = new Variable { DataType = existingVar.DataType, Identifier = existingVar.Identifier, Value = value };
                 }
                 else
                 {
-                    throw new Exception($"Temp '{value}' Temp.");
+                    existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
                 }
-            }
-        }
 
-        return null!;
-    }
-
-    public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
-    {
-        var identifier = context.IDENTIFIER().GetText();
-        var expressions = context.expression();
-        Variable existingVar = null!;
-
-        foreach(var variable in _variables)
-        {
-            if(variable.Identifier == identifier)
-            {
-                existingVar = variable;
-            }
-        }
-
-        foreach (var expression in expressions)
-        {
-            object value = Visit(expression)!;
-
-            if (existingVar != null)
-            {
                 if (existingVar.DataType == "INT")
                 {
                     if (value is int)
                     {
 
                         _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                     }
                     else
                     {
@@ -175,7 +101,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 {
                     if (value is float)
                     {
-                        Variables.Add(identifier, value);
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                     }
                     else
                     {
@@ -186,7 +113,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 {
                     if (value is char)
                     {
-                        Variables.Add(identifier, value);
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                     }
                     else
                     {
@@ -197,7 +125,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 {
                     if (value is bool)
                     {
-                        Variables.Add(identifier, value);
+                        _variables.Add(existingVar);
+                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
                     }
                     else
                     {
@@ -206,20 +135,37 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 }
             }
         }
+
         return null!;
     }
 
+    //public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
+    //{
+    //    var varName = context.IDENTIFIER().GetText();
+
+    //    var expressions = context.expression();
+
+    //    foreach (var expression in expressions)
+    //    {
+    //        object value = Visit(expression);
+
+    //        _variables.Add(v => v.Value = value, v.Identifier = .....);
+    //    }
+
+    //    return null!;
+    //}
+
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
-        string variableName = context.IDENTIFIER().GetText();
+        string identifier = context.IDENTIFIER().GetText();
 
-        if (Variables.ContainsKey(variableName))
+        if (_variables.Any(p => p.Identifier == identifier))
         {
-            return Variables[variableName]!;
+            return _variables.Find(p => p.Identifier == identifier)!;
         }
         else
         {
-            throw new Exception(string.Format("Undefined variable '{0}'", variableName));
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
         }
     }
 
