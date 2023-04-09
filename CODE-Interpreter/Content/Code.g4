@@ -14,19 +14,21 @@ executable: NEWLINE TAB(expression COMMENT?) | COMMENT;
 
 functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
-expression
-    : constant                          #constantExpression
-    | IDENTIFIER                        #identifierExpression
-    | IDENTIFIER equalsOp expression    #equalsExpression
-    | functionCall						#functionCallExpression
-    | '(' expression ')'                #parethesizedExpression
-    | expression multOp expression      #multiplicativeExpression
-    | expression addOp expression       #additiveExpression
-    | expression concat expression		#concatExpression
-    | expression compareOp expression   #comparativeExpression
-    | newline                           #newlineExpression
-    | expression escape expression      #escapeExpression
-    ;   
+ESCAPE: '[' .*? ']';
+
+expression 
+    : constant                              #constantExpression
+    | IDENTIFIER                            #identifierExpression
+    | IDENTIFIER equalsOp expression        #equalsExpression
+    | functionCall						    #functionCallExpression
+    | '(' expression ')'                    #parethesizedExpression
+    | expression multOp expression          #multiplicativeExpression
+    | expression addOp expression           #additiveExpression
+    | expression concat expression		    #concatExpression
+    | expression compareOp expression       #comparativeExpression
+    | newline                               #newlineExpression
+    | ESCAPE                                #escapeExpression
+    ;
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -43,7 +45,6 @@ equalsOp: EQUALS;
 logicOp: 'AND' | 'OR' | 'NOT';
 concat: '&';
 newline: '$';
-escape: '[' ']';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 

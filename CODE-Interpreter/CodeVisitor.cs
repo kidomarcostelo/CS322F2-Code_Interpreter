@@ -1,4 +1,5 @@
 using Antlr4.Runtime.Misc;
+using Antlr4.Runtime.Tree;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
@@ -169,7 +170,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
-    public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
+    //comment lang sa nako dol para mugana concat
+    /*public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         string valueString = context.GetText();
         object value = null!;
@@ -193,7 +195,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
 
         return value;
-    }
+    }*/
 
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
@@ -211,6 +213,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
+
+    public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
+    {
+        string content = context.GetText().Substring(1, context.GetText().Length - 2);
+        return content;
+    }
+
 
     public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {

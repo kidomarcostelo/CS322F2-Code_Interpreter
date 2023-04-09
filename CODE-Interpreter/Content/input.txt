@@ -1,4 +1,3 @@
 BEGIN CODE
-	INT INT = 5
-	DISPLAY: INT
+	DISPLAY: 1 & [&&&] & "yehey" & 2 & [$] & $ & "huhu" & 3 & [#] & "rawr"
 END CODE
