@@ -1,19 +1,18 @@
 grammar Code;
 
-program:
-        BEGIN_CODE statement NEWLINE END_CODE EOF;
+program: BEGIN_CODE statement NEWLINE END_CODE EOF;
 
 statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
 
-declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
+declaration:  NEWLINE TAB (initialization COMMENT?) | COMMENT;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE (expression COMMENT?) | COMMENT;
+executable: NEWLINE TAB(expression COMMENT?) | COMMENT;
 
-functionCall: NEWLINE (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
 expression
     : constant                          #constantExpression
@@ -23,15 +22,28 @@ expression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
+    | expression concat expression		#concatExpression
     | expression compareOp expression   #comparativeExpression
-    ;
+    | newline                           #newlineExpression
+    | expression escape expression      #escapeExpression
+    ;   
 
 // operations
-multOp: '*' | '/' ; 
+multOp: '*' | '/' | '%'; 
 addOp: '+' | '-' ;
-compareOp: '==' ;
+compareOp
+    : '=='  // equal
+    | '>'   // greater than
+    | '<'   // lesser than
+    | '>='  // greater than or equal to
+    | '<='  // lesser than or equal to
+    | '<>'  // not equal
+    ;
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
+concat: '&';
+newline: '$';
+escape: '[' ']';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 
@@ -59,7 +71,7 @@ BOOLVAL: 'TRUE' | 'FALSE';
 INTEGERVAL: [0-9]+;
 FLOATVAL: [0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
-STRINGVAL: '"' .* '"'; 
+STRINGVAL: '"' (.*?) '"'; 
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
@@ -72,5 +84,4 @@ SCAN: 'SCAN:';
 EQUALS: '=';
 COMMA: ',';
 
-COMMENT: '#' ~[\r\n]* NEWLINE? -> skip;
-
+COMMENT: NEWLINE? '#' ~[\r?\n]* ? -> channel(HIDDEN);

@@ -1,36 +1,23 @@
-namespace CODE_Interpreter;
+using Antlr4;
 using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
+using CODE_Interpreter;
 using CODE_Interpreter.Content;
+using static System.Net.Mime.MediaTypeNames;
+using CommonTokenStream = Antlr4.Runtime.CommonTokenStream;
 
-static class Program
-{
-    /// <summary>
-    ///  The main entry point for the application.
-    /// </summary>
-    [STAThread]
-    static void Main()
-    {
-        // To customize application configuration such as set high DPI settings or default font,
-        // see https://aka.ms/applicationconfiguration.
-        // ApplicationConfiguration.Initialize();
-        // Application.Run(new Form1());
+var fileName = "Content\\input.txt";
+
+var fileContents = File.ReadAllText(fileName);
 
 
+var inputStream = new AntlrInputStream(fileContents);
 
-        var baseDirectory = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName;
-        var filename = $@"{baseDirectory}\Content\input.txt";
-
-        var code = File.ReadAllText(filename);
-        Console.WriteLine(code);
-
-        var inputStream = new AntlrInputStream(code);
-        var codeLexer = new CodeLexer(inputStream);
-        var commonTokenStream = new CommonTokenStream(codeLexer);
-        var codeParser = new CodeParser(commonTokenStream);
-
-        var codeContext = codeParser.program();
-        var visitor = new CodeVisitor();
-
-        visitor.Visit(codeContext);
-    }    
-}
+var codeLexer = new CodeLexer(inputStream);
+var codeTokenStream = new CommonTokenStream(codeLexer);
+var codeParser = new CodeParser(codeTokenStream);
+//simpleParser.AddErrorListener();
+var codeContext = codeParser.program();
+var visitor = new CodeVisitor();
+visitor.Visit(codeContext);
+Console.WriteLine("In Console");
