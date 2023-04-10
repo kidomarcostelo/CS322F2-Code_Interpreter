@@ -136,7 +136,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 }
             }
         }
-
         return null!;
     }
 
@@ -213,6 +212,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
+    
+    public override object VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
+    {
+        return (object) Visit(context.expression());
+    }
 
     public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
     {
@@ -223,8 +227,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
-        var left = Visit(context.expression(0));
-        var right = Visit(context.expression(1));
+        object left = Visit(context.expression(0));
+        object right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
 
@@ -240,7 +244,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-
+        
         var op = context.multOp().GetText();
 
         return op switch
@@ -266,86 +270,110 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Add (object? left, object? right)
     {
+        left = isVariable(left);
+        right = isVariable(right);
+
         if (left is int l && right is int r)
             return l + r;
         
         if (left is float lf && right is float rf)
             return lf + rf;
+
+        if (left is int lInt && right is float rfloat)
+            return lInt + rfloat;
         
-        if (left is int lInt && right is float rFloat)
-            return lInt + rFloat;
-        
-        if (left is float lFLoat && right is int rInt)
-            return lFLoat + rInt;
+        if (left is float lFloat && right is int rInt)
+            return lFloat + rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Subtract (object? left, object? right)
     {
+        left = isVariable(left);
+        right = isVariable(right);
+
         if (left is int l && right is int r)
             return l - r;
         
         if (left is float lf && right is float rf)
             return lf - rf;
+
+        if (left is int lInt && right is float rfloat)
+            return lInt - rfloat;
         
-        if (left is int lInt && right is float rFloat)
-            return lInt - rFloat;
-        
-        if (left is float lFLoat && right is int rInt)
-            return lFLoat - rInt;
+        if (left is float lFloat && right is int rInt)
+            return lFloat - rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Multiply (object? left, object? right)
     {
+        left = isVariable(left);
+        right = isVariable(right);
+
         if (left is int l && right is int r)
             return l * r;
         
         if (left is float lf && right is float rf)
             return lf * rf;
+
+        if (left is int lInt && right is float rfloat)
+            return lInt * rfloat;
         
-        if (left is int lInt && right is float rFloat)
-            return lInt * rFloat;
-        
-        if (left is float lFLoat && right is int rInt)
-            return lFLoat * rInt;
+        if (left is float lFloat && right is int rInt)
+            return lFloat * rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Divide (object? left, object? right)
     {
+        left = isVariable(left);
+        right = isVariable(right);
+
         if (left is int l && right is int r)
             return l / r;
         
         if (left is float lf && right is float rf)
             return lf / rf;
+
+        if (left is int lInt && right is float rfloat)
+            return lInt / rfloat;
         
-        if (left is int lInt && right is float rFloat)
-            return lInt / rFloat;
-        
-        if (left is float lFLoat && right is int rInt)
-            return lFLoat / rInt;
+        if (left is float lFloat && right is int rInt)
+            return lFloat / rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Modulo (object? left, object? right)
     {
+        left = isVariable(left);
+        right = isVariable(right);
+
         if (left is int l && right is int r)
             return l % r;
         
         if (left is float lf && right is float rf)
             return lf % rf;
+
+        if (left is int lInt && right is float rfloat)
+            return lInt % rfloat;
         
-        if (left is int lInt && right is float rFloat)
-            return lInt % rFloat;
-        
-        if (left is float lFLoat && right is int rInt)
-            return lFLoat % rInt;
+        if (left is float lFloat && right is int rInt)
+            return lFloat % rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private object isVariable(object? obj)
+    {
+        if (obj is Variable var)
+        {
+            obj = var.Value;
+        }
+        return obj;
     }
 }

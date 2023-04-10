@@ -1,34 +1,34 @@
 grammar Code;
 
-program: BEGIN_CODE statement NEWLINE END_CODE EOF;
+program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
+statement: (declaration | functionCall)* (declaration+ (executable* | functionCall*)?);
 
-declaration:  NEWLINE TAB (initialization COMMENT?) | COMMENT;
+declaration:  NEWLINE TAB initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE TAB(expression COMMENT?) | COMMENT;
+executable: NEWLINE TAB (expression);
 
 functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
 ESCAPE: '[' .*? ']';
 
-expression 
-    : constant                              #constantExpression
-    | IDENTIFIER                            #identifierExpression
-    | IDENTIFIER equalsOp expression        #equalsExpression
-    | functionCall						    #functionCallExpression
-    | '(' expression ')'                    #parethesizedExpression
-    | expression multOp expression          #multiplicativeExpression
-    | expression addOp expression           #additiveExpression
-    | expression concat expression		    #concatExpression
-    | expression compareOp expression       #comparativeExpression
-    | newline                               #newlineExpression
-    | ESCAPE                                #escapeExpression
-    ;
+expression
+    : constant                          #constantExpression
+    | IDENTIFIER                        #identifierExpression
+    | IDENTIFIER equalsOp expression    #equalsExpression
+    | functionCall						          #functionCallExpression
+    | '(' expression ')'                #parethesizedExpression
+    | expression multOp expression      #multiplicativeExpression
+    | expression addOp expression       #additiveExpression
+    | expression concat expression		  #concatExpression
+    | expression compareOp expression   #comparativeExpression
+    | newline                           #newlineExpression
+    | ESCAPE                            #escapeExpression
+    ;   
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -41,6 +41,7 @@ compareOp
     | '<='  // lesser than or equal to
     | '<>'  // not equal
     ;
+    
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
 concat: '&';
@@ -58,6 +59,8 @@ LOOP: 'WHILE';
 // tokens
 NEWLINE: ('\r\n');
 TAB: '\t';
+COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
+WS: ' ' -> skip;
 
 fragment BEGIN: 'BEGIN';
 fragment END: 'END';
@@ -69,20 +72,19 @@ DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 
 // value equivalents
 BOOLVAL: 'TRUE' | 'FALSE';
-INTEGERVAL: [0-9]+;
-FLOATVAL: [0-9]+'.'[0-9]+;
+INTEGERVAL: '-'?[0-9]+;
+FLOATVAL: '-'?[0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
 STRINGVAL: '"' (.*?) '"'; 
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
     LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
-    
-IDENTIFIER: [a-zA-Z_][a-zA-Z_]*;
+
 DISPLAY: 'DISPLAY:';
 SCAN: 'SCAN:';
 
 EQUALS: '=';
 COMMA: ',';
 
-COMMENT: NEWLINE? '#' ~[\r?\n]* ? -> channel(HIDDEN);
+IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
