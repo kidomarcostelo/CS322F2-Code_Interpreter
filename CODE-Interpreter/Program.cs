@@ -20,4 +20,3 @@ var codeParser = new CodeParser(codeTokenStream);
 var codeContext = codeParser.program();
 var visitor = new CodeVisitor();
 visitor.Visit(codeContext);
-//Console.WriteLine("In Console");
