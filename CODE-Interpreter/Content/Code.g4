@@ -20,16 +20,15 @@ expression
     : constant                          #constantExpression
     | IDENTIFIER                        #identifierExpression
     | IDENTIFIER equalsOp expression    #equalsExpression
-    | functionCall						#functionCallExpression
+    | functionCall						          #functionCallExpression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
-    | expression concat expression		#concatExpression
+    | expression concat expression		  #concatExpression
     | expression compareOp expression   #comparativeExpression
     | newline                           #newlineExpression
-    | ESCAPE                                #escapeExpression
+    | ESCAPE                            #escapeExpression
     ;   
-
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -42,11 +41,11 @@ compareOp
     | '<='  // lesser than or equal to
     | '<>'  // not equal
     ;
+    
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
 concat: '&';
 newline: '$';
-escape: '[' ']';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 

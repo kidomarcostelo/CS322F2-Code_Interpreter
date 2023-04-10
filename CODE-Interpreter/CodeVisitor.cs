@@ -1,4 +1,5 @@
 using Antlr4.Runtime.Misc;
+using Antlr4.Runtime.Tree;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
@@ -68,7 +69,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 identifier == "END" || identifier == "CODE" || identifier == "DISPLAY" || identifier == "SCAN" ||
                 identifier == "BEGIN IF")
             {
-                throw new Exception($"Temp => Bawal Reserved Word as Identifier");
+                throw new Exception($"Error: '{identifier}' is a Reserved Word and cannot be used as Variable Name.");
             }
 
             foreach (var expression in expressions)
@@ -77,7 +78,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
                 if (_variables.Any(p => p.Identifier == identifier))
                 {
-                    existingVar = new Variable { DataType = existingVar.DataType, Identifier = existingVar.Identifier, Value = value };
+                    throw new Exception($"Error: Variable Name '{identifier}' has been already initialized.");
                 }
                 else
                 {
@@ -135,10 +136,24 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 }
             }
         }
-
         return null!;
     }
 
+    //public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
+    //{
+    //    var varName = context.IDENTIFIER().GetText();
+
+    //    var expressions = context.expression();
+
+    //    foreach (var expression in expressions)
+    //    {
+    //        object value = Visit(expression);
+
+    //        _variables.Add(v => v.Value = value, v.Identifier = .....);
+    //    }
+
+    //    return null!;
+    //}
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
@@ -154,7 +169,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
-    public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
+    //comment lang sa nako dol para mugana concat
+    /*public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         string valueString = context.GetText();
         object value = null!;
@@ -178,7 +194,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
 
         return value;
-    }
+    }*/
 
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
@@ -201,6 +217,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         return (object) Visit(context.expression());
     }
+
+    public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
+    {
+        string content = context.GetText().Substring(1, context.GetText().Length - 2);
+        return content;
+    }
+
 
     public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
