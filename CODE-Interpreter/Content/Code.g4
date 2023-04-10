@@ -19,17 +19,17 @@ display: NEWLINE? 'DISPLAY' ':' expression NEWLINE?;
 ESCAPE: '[' .*? ']';
 
 expression
-    : constant                          #constantExpression
-    | IDENTIFIER                        #identifierExpression
-    | IDENTIFIER equalsOp expression    #equalsExpression
-    | functionCall						          #functionCallExpression
-    | '(' expression ')'                #parethesizedExpression
-    | expression multOp expression      #multiplicativeExpression
-    | expression addOp expression       #additiveExpression
-    | expression concat expression		  #concatExpression
-    | expression compareOp expression   #comparativeExpression
-    | newline                           #newlineExpression
-    | ESCAPE                            #escapeExpression
+    : constant                              #constantExpression
+    | IDENTIFIER                            #identifierExpression
+    | IDENTIFIER equalsOp expression        #equalsExpression
+    | functionCall						    #functionCallExpression
+    | '(' expression ')'                    #parethesizedExpression
+    | expression multOp expression          #multiplicativeExpression
+    | expression addOp expression           #additiveExpression
+    | expression concat expression		    #concatExpression
+    | expression compareOp expression       #comparativeExpression
+    | newline                               #newlineExpression
+    | ESCAPE                                #escapeExpression
     ;   
 
 // operations

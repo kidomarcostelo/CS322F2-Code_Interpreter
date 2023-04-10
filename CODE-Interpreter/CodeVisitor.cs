@@ -118,21 +118,38 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null!;
     }
 
-    //public override object VisitAssignment([NotNull] CodeParser.AssignmentContext context)
-    //{
-    //    var varName = context.IDENTIFIER().GetText();
+    public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
+    {
+        //var varName = context.IDENTIFIER().GetText();
 
-    //    var expressions = context.expression();
+        //var expressions = context.expression();
 
-    //    foreach (var expression in expressions)
-    //    {
-    //        object value = Visit(expression);
+        //foreach (var expression in expressions)
+        //{
+        //    object value = Visit(expression);
 
-    //        _variables.Add(v => v.Value = value, v.Identifier = .....);
-    //    }
+        //    _variables.Add(v => v.Value = value, v.Identifier = .....);
+        //}
 
-    //    return null!;
-    //}
+        //return null!;
+        var variableName = context.IDENTIFIER().GetText();
+        var expressions = context.expression();
+
+        int index = _variables.FindIndex(v => v.Identifier == variableName);
+
+        if (index < 0)
+        {
+            throw new Exception($"Variable '{variableName}' not found.");
+        }
+
+        foreach (var expression in expressions)
+        {
+            object value = Visit(expression)!;
+            _variables[index].Value = value;
+            Console.Write(_variables[index].Value);
+        }
+        return null;
+    }
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
@@ -149,31 +166,47 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     }
 
     //comment lang sa nako dol para mugana concat
-    /*public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
+    public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
-        string valueString = context.GetText();
-        object value = null!;
+        //string valueString = context.GetText();
+        //object value = null!;
 
-        // Convert value to i'ts type
-        if (valueString == "TRUE" || valueString == "FALSE")
-        {
-            value = bool.Parse(valueString);
-        }
-        else if (int.TryParse(valueString, out int intValue))
-        {
-            value = intValue;
-        }
-        else if (float.TryParse(valueString, out float floatValue))
-        {
-            value = floatValue;
-        }
-        else if (valueString.Length == 3 && valueString[0] == '\'' && valueString[2] == '\'')
-        {
-            value = valueString[1];
-        }
+        //// Convert value to i'ts type
+        //if (valueString == "TRUE" || valueString == "FALSE")
+        //{
+        //    value = bool.Parse(valueString);
+        //}
+        //else if (int.TryParse(valueString, out int intValue))
+        //{
+        //    value = intValue;
+        //}
+        //else if (float.TryParse(valueString, out float floatValue))
+        //{
+        //    value = floatValue;
+        //}
+        //else if (valueString.Length == 3 && valueString[0] == '\'' && valueString[2] == '\'')
+        //{
+        //    value = valueString[1];
+        //}
 
-        return value;
-    }*/
+        //return value;
+        if (context.constant().INTEGERVAL() is { } i)
+            return int.Parse(i.GetText());
+
+        else if (context.constant().FLOATVAL() is { } f)
+            return float.Parse(f.GetText());
+
+        else if (context.constant().CHARVAL() is { } g)
+            return g.GetText()[1];
+
+        else if (context.constant().BOOLVAL() is { } b)
+            return b.GetText().Equals("\"TRUE\"");
+
+        else if (context.constant().STRINGVAL() is { } s)
+            return s.GetText()[1..^1];
+
+        throw new NotImplementedException();
+    }
 
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
