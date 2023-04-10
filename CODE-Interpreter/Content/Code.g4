@@ -1,19 +1,18 @@
 grammar Code;
 
-program:
-        BEGIN_CODE statement NEWLINE END_CODE EOF;
+program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
+statement: (declaration | functionCall)* (declaration+ (executable* | functionCall*)?);
 
-declaration:  NEWLINE (initialization COMMENT?) | COMMENT;
+declaration:  NEWLINE TAB initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE (expression COMMENT?) | COMMENT;
+executable: NEWLINE TAB (expression);
 
-functionCall: NEWLINE (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
 expression
     : constant                          #constantExpression
@@ -23,8 +22,12 @@ expression
     | '(' expression ')'                #parethesizedExpression
     | expression multOp expression      #multiplicativeExpression
     | expression addOp expression       #additiveExpression
+    | expression concat expression		#concatExpression
     | expression compareOp expression   #comparativeExpression
+    | newline                           #newlineExpression
+    | expression escape expression      #escapeExpression
     ;   
+
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -39,6 +42,9 @@ compareOp
     ;
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR' | 'NOT';
+concat: '&';
+newline: '$';
+escape: '[' ']';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 
@@ -52,6 +58,8 @@ LOOP: 'WHILE';
 // tokens
 NEWLINE: ('\r\n');
 TAB: '\t';
+COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
+WS: ' ' -> skip;
 
 fragment BEGIN: 'BEGIN';
 fragment END: 'END';
@@ -63,20 +71,19 @@ DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 
 // value equivalents
 BOOLVAL: 'TRUE' | 'FALSE';
-INTEGERVAL: [0-9]+;
-FLOATVAL: [0-9]+'.'[0-9]+;
+INTEGERVAL: '-'?[0-9]+;
+FLOATVAL: '-'?[0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
 STRINGVAL: '"' (.*?) '"'; 
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
     LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
-    
-IDENTIFIER: [a-zA-Z_][a-zA-Z_]*;
+
 DISPLAY: 'DISPLAY:';
 SCAN: 'SCAN:';
 
 EQUALS: '=';
 COMMA: ',';
 
-COMMENT: NEWLINE? '#' ~[\r?\n]* ? -> channel(HIDDEN);
+IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
