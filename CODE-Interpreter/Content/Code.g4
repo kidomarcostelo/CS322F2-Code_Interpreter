@@ -14,6 +14,8 @@ executable: NEWLINE TAB (expression);
 
 functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
 
+ESCAPE: '[' .*? ']';
+
 expression
     : constant                          #constantExpression
     | IDENTIFIER                        #identifierExpression
@@ -25,7 +27,7 @@ expression
     | expression concat expression		#concatExpression
     | expression compareOp expression   #comparativeExpression
     | newline                           #newlineExpression
-    | expression escape expression      #escapeExpression
+    | ESCAPE                                #escapeExpression
     ;   
 
 
