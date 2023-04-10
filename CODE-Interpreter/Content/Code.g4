@@ -12,7 +12,9 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE TAB (expression);
 
-functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (display | SCAN IDENTIFIER (',' IDENTIFIER)*);
+ 
+display: NEWLINE? 'DISPLAY' ':' expression NEWLINE?;
 
 ESCAPE: '[' .*? ']';
 
@@ -81,7 +83,6 @@ STRINGVAL: '"' (.*?) '"';
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
     LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
 
-DISPLAY: 'DISPLAY:';
 SCAN: 'SCAN:';
 
 EQUALS: '=';

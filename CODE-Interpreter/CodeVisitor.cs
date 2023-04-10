@@ -8,38 +8,17 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
-    private Dictionary<string, object?> Functions { get; } = new();
 
-    public CodeVisitor()
+    public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        Functions["DISPLAY:"] = new Func<object?[], object?>(Display);
-    }
+        var exp = Visit(context.expression());
 
-    private object? Display(object?[] args)
-    {
-        foreach (var arg in args)
-        {
-            Console.Write(arg);
-        }
-        return null;
-    }
+        if (exp is bool b)
+            exp = b.ToString().ToUpper();
 
+        Console.Write(exp + " ");
 
-    public override object? VisitFunctionCall([NotNull] CodeParser.FunctionCallContext context)
-    {
-        var name = context.DISPLAY().GetText();
-        var args = context.expression().children.Select(Visit).ToArray();
-
-        if (!Functions.ContainsKey(name))
-        {
-            throw new Exception($"Function {name} is not defined.");
-        }
-
-        if (Functions[name] is not Func<object?[], object?> func)
-        {
-            throw new Exception($"Variable {name} is not a function.");
-        }
-        return func(args);
+        return new object();
     }
 
     // recognize variable
@@ -53,7 +32,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null!;
     }
 
-    public override object VisitInitialization([NotNull] CodeParser.InitializationContext context)
+    public override object? VisitInitialization([NotNull] CodeParser.InitializationContext context)
     {
         string dataType = context.DATA_TYPE().GetText();
         IList<CodeParser.AssignmentContext> assignments = context.assignment();
