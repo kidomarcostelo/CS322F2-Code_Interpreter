@@ -16,6 +16,8 @@ var inputStream = new AntlrInputStream(fileContents);
 var codeLexer = new CodeLexer(inputStream);
 var codeTokenStream = new CommonTokenStream(codeLexer);
 var codeParser = new CodeParser(codeTokenStream);
+codeParser.RemoveErrorListeners();
+codeParser.AddErrorListener(new SyntaxErrorEvaluator());
 //simpleParser.AddErrorListener();
 var codeContext = codeParser.program();
 var visitor = new CodeVisitor();
