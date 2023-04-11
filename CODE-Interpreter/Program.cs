@@ -12,13 +12,19 @@ var fileContents = File.ReadAllText(fileName);
 
 
 var inputStream = new AntlrInputStream(fileContents);
+try
+{
+    var codeLexer = new CodeLexer(inputStream);
+    var codeTokenStream = new CommonTokenStream(codeLexer);
+    var codeParser = new CodeParser(codeTokenStream);
+    //codeParser.RemoveErrorListeners();
+    //codeParser.AddErrorListener(new SyntaxErrorEvaluator());
+    var codeContext = codeParser.program();
+    var visitor = new CodeVisitor();
+    visitor.Visit(codeContext);
+    //Console.WriteLine("In Console");
 
-var codeLexer = new CodeLexer(inputStream);
-var codeTokenStream = new CommonTokenStream(codeLexer);
-var codeParser = new CodeParser(codeTokenStream);
-//codeParser.RemoveErrorListeners();
-//codeParser.AddErrorListener(new SyntaxErrorEvaluator());
-var codeContext = codeParser.program();
-var visitor = new CodeVisitor();
-visitor.Visit(codeContext);
-//Console.WriteLine("In Console");
+}catch(Exception e)
+{
+    Console.WriteLine(e);
+}

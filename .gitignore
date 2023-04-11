@@ -478,3 +478,6 @@ $RECYCLE.BIN/
 
 #antlr
 *.antlr/
+
+*test.cs
+*tempCodeRunnerFile.cs
