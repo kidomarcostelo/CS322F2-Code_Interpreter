@@ -12,22 +12,24 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE TAB (expression);
 
-functionCall: NEWLINE TAB (DISPLAY expression | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (display | SCAN IDENTIFIER (',' IDENTIFIER)*);
+ 
+display: NEWLINE? 'DISPLAY' ':' expression NEWLINE?;
 
 ESCAPE: '[' .*? ']';
 
 expression
-    : constant                          #constantExpression
-    | IDENTIFIER                        #identifierExpression
-    | IDENTIFIER equalsOp expression    #equalsExpression
-    | functionCall						          #functionCallExpression
-    | '(' expression ')'                #parethesizedExpression
-    | expression multOp expression      #multiplicativeExpression
-    | expression addOp expression       #additiveExpression
-    | expression concat expression		  #concatExpression
-    | expression compareOp expression   #comparativeExpression
-    | newline                           #newlineExpression
-    | ESCAPE                            #escapeExpression
+    : constant                              #constantExpression
+    | IDENTIFIER                            #identifierExpression
+    | IDENTIFIER equalsOp expression        #equalsExpression
+    | functionCall						    #functionCallExpression
+    | '(' expression ')'                    #parethesizedExpression
+    | expression multOp expression          #multiplicativeExpression
+    | expression addOp expression           #additiveExpression
+    | expression concat expression		    #concatExpression
+    | expression compareOp expression       #comparativeExpression
+    | newline                               #newlineExpression
+    | ESCAPE                                #escapeExpression
     ;   
 
 // operations
@@ -81,7 +83,6 @@ STRINGVAL: '"' (.*?) '"';
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
     LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
 
-DISPLAY: 'DISPLAY:';
 SCAN: 'SCAN:';
 
 EQUALS: '=';
