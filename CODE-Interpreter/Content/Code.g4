@@ -18,8 +18,6 @@ display: NEWLINE? DISPLAY ':' expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
-ESCAPE: '[' .*? ']';
-
 expression
     : constant                              #constantExpression
     | IDENTIFIER                            #identifierExpression
@@ -66,6 +64,7 @@ NEWLINE: ('\r\n');
 TAB: '\t';
 COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
 WS: ' ' -> skip;
+ESCAPE: '[' .+? ']';
 
 fragment BEGIN: 'BEGIN';
 fragment END: 'END';

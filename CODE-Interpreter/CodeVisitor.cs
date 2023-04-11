@@ -42,7 +42,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             string identifier = assignment.IDENTIFIER().GetText();
             var expressions = assignment.expression();
-            Variable existingVar = null!;
+            Variable existingVar = new();
 
             if (identifier == "INT" || identifier == "FLOAT" || identifier == "BOOL" || identifier == "CHAR" ||
                 identifier == "IF" || identifier == "ELSE" || identifier == "LOOP" || identifier == "BEGIN" ||
@@ -50,6 +50,17 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 identifier == "BEGIN IF")
             {
                 throw new Exception($"Error: '{identifier}' is a Reserved Word and cannot be used as Variable Name.");
+            }
+
+            if (expressions.Count() == 0)
+            {
+                if (_variables.Any(p => p.Identifier == identifier))
+                {
+                    throw new Exception($"Error: Variable Name '{identifier}' has been already initialized.");
+                }
+                existingVar = new Variable { DataType = dataType, Identifier = identifier };
+                _variables.Add(existingVar);
+                continue;
             }
 
             foreach (var expression in expressions)
@@ -60,60 +71,43 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 {
                     throw new Exception($"Error: Variable Name '{identifier}' has been already initialized.");
                 }
-                else
-                {
-                    existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
-                }
 
-                if (existingVar.DataType == "INT")
+                if (dataType == "INT")
                 {
-                    if (value is int)
-                    {
-
-                        _variables.Add(existingVar);
-                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                    }
-                    else
+                    if (!(value is int))
                     {
                         throw new Exception($"Error: Value '{value}' cannot be assigned to an INT variable.");
                     }
                 }
-                else if (existingVar.DataType == "FLOAT")
+                else if (dataType == "FLOAT")
                 {
-                    if (value is float)
-                    {
-                        _variables.Add(existingVar);
-                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                    }
-                    else
+                    if (!(value is float))
                     {
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a FLOAT variable.");
                     }
                 }
-                else if (existingVar.DataType == "CHAR")
+                else if (dataType == "CHAR")
                 {
-                    if (value is char)
-                    {
-                        _variables.Add(existingVar);
-                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                    }
-                    else
+                    if (!(value is char))
                     {
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a CHAR variable.");
                     }
                 }
-                else if (existingVar.DataType == "BOOL")
+                else if (dataType == "BOOL")
                 {
-                    if (value is bool)
-                    {
-                        _variables.Add(existingVar);
-                        Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
-                    }
-                    else
+                    if (!(value.ToString() == "TRUE" || value.ToString() == "FALSE"))
                     {
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
+
                     }
+
+                    value = value.ToString()!.ToUpper();
                 }
+
+
+                existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
+                _variables.Add(existingVar);
+                //Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
             }
         }
         return null!;
@@ -201,14 +195,28 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return g.GetText()[1];
 
         else if (context.constant().BOOLVAL() is { } b)
-            return b.GetText().Equals("\"TRUE\"");
+            return b.GetText()[1..^1];
 
         else if (context.constant().STRINGVAL() is { } s)
             return s.GetText()[1..^1];
 
         throw new NotImplementedException();
     }
+    public override object VisitEqualsExpression([NotNull] CodeParser.EqualsExpressionContext context)
+    {
+        var variableName = context.IDENTIFIER().GetText();
 
+        var existingVar = _variables.Find(p => p.Identifier == variableName)!;
+
+        if (existingVar == null)
+        {
+            throw new Exception($"Variable {variableName} is undefined");
+        }
+        var value = Visit(context.expression())!;
+        existingVar.Value = value;
+
+        return value;
+    }
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
         if (context.INTEGERVAL() is { } i)
@@ -221,7 +229,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return s.GetText()[1..^1];
 
         if (context.BOOLVAL() is { } b)
-            return b.GetText() == "true";
+            return b.GetText()[1..^1];
 
         throw new NotImplementedException();
     }
