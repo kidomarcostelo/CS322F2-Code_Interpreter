@@ -8,7 +8,11 @@ declaration:  NEWLINE TAB initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
-assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
+assignment
+    : IDENTIFIER 
+    | IDENTIFIER (equalsOp assignment)+
+    | IDENTIFIER equalsOp expression 
+    ; 
 
 executable: NEWLINE TAB (expression);
 
@@ -94,3 +98,4 @@ EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
+
