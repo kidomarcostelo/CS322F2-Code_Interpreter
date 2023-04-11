@@ -2,7 +2,7 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable* | functionCall*)?);
+statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
 
 declaration:  NEWLINE TAB initialization;
 
@@ -12,9 +12,11 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE TAB (expression);
 
-functionCall: NEWLINE TAB (display | SCAN IDENTIFIER (',' IDENTIFIER)*);
+functionCall: NEWLINE TAB (display | scan);
  
-display: NEWLINE? 'DISPLAY' ':' expression NEWLINE?;
+display: NEWLINE? DISPLAY ':' expression NEWLINE?;
+
+scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
 ESCAPE: '[' .*? ']';
 
@@ -28,6 +30,7 @@ expression
     | expression addOp expression           #additiveExpression
     | expression concat expression		    #concatExpression
     | expression compareOp expression       #comparativeExpression
+    | expression logicOp expression         #logicalExpression
     | newline                               #newlineExpression
     | ESCAPE                                #escapeExpression
     ;   
@@ -73,17 +76,19 @@ END_CODE: END ' ' CODE;
 DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 
 // value equivalents
-BOOLVAL: 'TRUE' | 'FALSE';
+BOOLVAL: '"' ('TRUE' | 'FALSE') '"';
 INTEGERVAL: '-'?[0-9]+;
 FLOATVAL: '-'?[0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
 STRINGVAL: '"' (.*?) '"'; 
 
+// functions
+SCAN: 'SCAN:';
+DISPLAY: 'DISPLAY';
+
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
-    LOOP | 'DISPLAY' | 'SCAN' | 'BEGIN IF';
-
-SCAN: 'SCAN:';
+    LOOP | DISPLAY | SCAN | 'BEGIN IF';
 
 EQUALS: '=';
 COMMA: ',';

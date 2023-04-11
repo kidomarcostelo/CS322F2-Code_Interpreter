@@ -16,6 +16,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (exp is bool b)
             exp = b.ToString().ToUpper();
 
+        exp = isVariable(exp);
         Console.Write(exp + " ");
 
         return new object();
@@ -272,6 +273,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
+
+        left = isVariable(left);
+        right = isVariable(right);
+
         return $"{left}{right}";
     }
 
@@ -380,10 +385,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
-    private object isVariable(object? obj)
+    private object? isVariable(object? obj)
     {
         if (obj is Variable var)
         {
+            if (!(_variables.Any(p => p.Identifier == var.Identifier)))
+                throw new Exception($"Undefined varible {var}");
             obj = var.Value;
         }
         return obj;
