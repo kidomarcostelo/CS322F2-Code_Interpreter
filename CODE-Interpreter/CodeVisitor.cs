@@ -160,31 +160,25 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
+    public override object VisitExecutable([NotNull] CodeParser.ExecutableContext context)
+    {
+        var identifier = context.IDENTIFIER().GetText();
+
+        var variable = _variables.Find(p => p.Identifier == identifier);
+
+        if (variable == null)
+        {
+            throw new Exception($"Variable {identifier} is undefined");
+        }
+
+        var value = Visit(context.expression());
+        variable.Value = value;
+
+        return value;
+    }
     //comment lang sa nako dol para mugana concat
     public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
-        //string valueString = context.GetText();
-        //object value = null!;
-
-        //// Convert value to i'ts type
-        //if (valueString == "TRUE" || valueString == "FALSE")
-        //{
-        //    value = bool.Parse(valueString);
-        //}
-        //else if (int.TryParse(valueString, out int intValue))
-        //{
-        //    value = intValue;
-        //}
-        //else if (float.TryParse(valueString, out float floatValue))
-        //{
-        //    value = floatValue;
-        //}
-        //else if (valueString.Length == 3 && valueString[0] == '\'' && valueString[2] == '\'')
-        //{
-        //    value = valueString[1];
-        //}
-
-        //return value;
         if (context.constant().INTEGERVAL() is { } i)
             return int.Parse(i.GetText());
 
@@ -233,10 +227,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
-    
     public override object VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
     {
-        return (object) Visit(context.expression());
+        return Visit(context.expression());
     }
 
     public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
@@ -304,11 +297,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf + rf;
 
-        if (left is int lInt && right is float rfloat)
-            return lInt + rfloat;
+        //if (left is int lInt && right is float rfloat)
+        //    return lInt + rfloat;
         
-        if (left is float lFloat && right is int rInt)
-            return lFloat + rInt;
+        //if (left is float lFloat && right is int rInt)
+        //    return lFloat + rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -324,11 +317,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf - rf;
 
-        if (left is int lInt && right is float rfloat)
-            return lInt - rfloat;
+        //if (left is int lInt && right is float rfloat)
+        //    return lInt - rfloat;
         
-        if (left is float lFloat && right is int rInt)
-            return lFloat - rInt;
+        //if (left is float lFloat && right is int rInt)
+        //    return lFloat - rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -344,11 +337,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf * rf;
 
-        if (left is int lInt && right is float rfloat)
-            return lInt * rfloat;
+        //if (left is int lInt && right is float rfloat)
+        //    return lInt * rfloat;
         
-        if (left is float lFloat && right is int rInt)
-            return lFloat * rInt;
+        //if (left is float lFloat && right is int rInt)
+        //    return lFloat * rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -364,11 +357,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf / rf;
 
-        if (left is int lInt && right is float rfloat)
-            return lInt / rfloat;
+        //if (left is int lInt && right is float rfloat)
+        //    return lInt / rfloat;
         
-        if (left is float lFloat && right is int rInt)
-            return lFloat / rInt;
+        //if (left is float lFloat && right is int rInt)
+        //    return lFloat / rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -384,11 +377,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf % rf;
 
-        if (left is int lInt && right is float rfloat)
-            return lInt % rfloat;
+        //if (left is int lInt && right is float rfloat)
+        //    return lInt % rfloat;
         
-        if (left is float lFloat && right is int rInt)
-            return lFloat % rInt;
+        //if (left is float lFloat && right is int rInt)
+        //    return lFloat % rInt;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }

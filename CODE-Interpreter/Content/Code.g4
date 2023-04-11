@@ -10,7 +10,7 @@ initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE TAB (expression);
+executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
 
 functionCall: NEWLINE TAB (display | scan);
  
