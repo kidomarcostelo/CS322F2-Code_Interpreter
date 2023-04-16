@@ -13,12 +13,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var exp = Visit(context.expression());
 
-        if (exp is bool b)
-            exp = b.ToString().ToUpper();
-
         exp = isVariable(exp);
-        Console.Write(exp + " ");
 
+        Console.Write(exp + " ");
         return new object();
     }
 
@@ -95,7 +92,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 }
                 else if (dataType == "BOOL")
                 {
-                    if (!(value.ToString() == "TRUE" || value.ToString() == "FALSE"))
+                    if (!(value is bool))
                     {
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
 
@@ -189,7 +186,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return g.GetText()[1];
 
         else if (context.constant().BOOLVAL() is { } b)
-            return b.GetText()[1..^1];
+            return b.GetText().Equals("\"TRUE\"");
 
         else if (context.constant().STRINGVAL() is { } s)
             return s.GetText()[1..^1];
@@ -223,7 +220,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return s.GetText()[1..^1];
 
         if (context.BOOLVAL() is { } b)
-            return b.GetText()[1..^1];
+            return b.GetText() == "true";
 
         throw new NotImplementedException();
     }
