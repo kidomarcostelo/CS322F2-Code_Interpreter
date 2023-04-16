@@ -1,6 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <RootNamespace>CODE_Interpreter</RootNamespace>
     <Nullable>enable</Nullable>
@@ -9,8 +9,17 @@
     <WarningaAsErrors>Nullable</WarningaAsErrors>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Antlr4.CodeGenerator" Version="4.6.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="FCTB" Version="2.16.24" />
     <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
     <PackageReference Include="Antlr4" Version="4.6.6" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Content\input.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
