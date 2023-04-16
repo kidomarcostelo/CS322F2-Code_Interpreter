@@ -19,6 +19,63 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return new object();
     }
 
+    public override object? VisitScan([NotNull] CodeParser.ScanContext context)
+    {
+        IList<ITerminalNode> identifiers = context.IDENTIFIER();
+        List<string> varNames = new List<string>();
+
+        // Loop through each identifier and create a variable object for it
+        foreach (var identifier in identifiers)
+        {
+            string varName = identifier.GetText();
+
+            // Check if variable is already defined para pwede sya ma scan
+            if (!_variables.Any(v => v.Identifier == varName))
+            {
+                throw new Exception($"Error: Variable '{varName}' is not defined.");
+            }
+
+            varNames.Add(varName);
+
+            // Create a new Variable object with default values and add it to the list
+            Variable variable = new Variable { Identifier = varName, DataType = "UNKNOWN", Value = null };
+            _variables.Add(variable);
+        }
+
+        // Ask user for input
+        Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
+        string inputLine = Console.ReadLine();
+        string[] inputValues = inputLine.Split(',');
+
+        // Loop through each input value and validate it based on the variable's data type,
+        // then parse and assign it to the corresponding var
+        for (int i = 0; i < identifiers.Count; i++)
+        {
+            Variable variable = _variables.First(v => v.Identifier == identifiers[i].GetText());
+            string inputValue = inputValues[i];
+
+            // Parse and assign input value to variable based on its data type
+            if (variable.DataType == "INT")
+            {
+                variable.Value = int.Parse(inputValue);
+            }
+            else if (variable.DataType == "FLOAT")
+            {
+                variable.Value = float.Parse(inputValue);
+            }
+            else if (variable.DataType == "BOOL")
+            {
+                variable.Value = bool.Parse(inputValue);
+            }
+            else
+            {
+                variable.Value = inputValue;
+            }
+        }
+
+        return null!;
+    }
+
     // recognize variable
     public override object VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
     {
@@ -173,7 +230,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return value;
     }
-    //comment lang sa nako dol para mugana concat
     public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         if (context.constant().INTEGERVAL() is { } i)
@@ -234,7 +290,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         string content = context.GetText().Substring(1, context.GetText().Length - 2);
         return content;
     }
-
 
     public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
