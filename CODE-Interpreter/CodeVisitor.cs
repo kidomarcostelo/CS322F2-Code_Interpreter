@@ -54,6 +54,29 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             Variable variable = _variables.First(v => v.Identifier == identifiers[i].GetText());
             string inputValue = inputValues[i];
 
+            // Validate the value inputted by the user based on the variable's data type
+            switch (variable.DataType)
+            {
+                case "INT":
+                    if (!int.TryParse(inputValue, out _))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for INT variable '{variable.Identifier}'.");
+                    }
+                    break;
+                case "FLOAT":
+                    if (!float.TryParse(inputValue, out _))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for FLOAT variable '{variable.Identifier}'.");
+                    }
+                    break;
+                case "BOOL":
+                    if (!bool.TryParse(inputValue, out _))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for BOOL variable '{variable.Identifier}'.");
+                    }
+                    break;
+            }
+
             // Parse and assign input value to variable based on its data type
             if (variable.DataType == "INT")
             {
