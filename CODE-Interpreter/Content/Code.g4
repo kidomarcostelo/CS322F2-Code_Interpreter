@@ -2,7 +2,9 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
+statement: (declaration | functionCall)* (declaration+ (executable | functionCall | conditionalExpression)*)?;
+
+//statement: conditionalFunction;
 
 declaration:  NEWLINE TAB initialization;
 
@@ -33,6 +35,25 @@ expression
     | ESCAPE                                #escapeExpression
     ;   
 
+boolExpression
+    : IDENTIFIER
+    | '(' expression ')'  
+    | expression compareOp expression
+    | expression logicOp expression
+    ;
+
+conditionalExpression: NEWLINE TAB ifBlock;
+
+ifBlock: IF (boolExpression) conditionalBlock (elseIfBlock)?;
+
+elseIfBlock: NEWLINE TAB ELSE (conditionalBlock | ifBlock);
+
+conditionalBlock: 
+                NEWLINE TAB BEGIN_IF 
+                    (NEWLINE TAB TAB (display | scan | IDENTIFIER (equalsOp expression)))* 
+                NEWLINE TAB END_IF;
+
+
 // operations
 multOp: '*' | '/' | '%'; 
 addOp: '+' | '-' ;
@@ -53,10 +74,10 @@ newline: '$';
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 
 // control flow structures
-fragment IF: 'IF';
-fragment ELSE: 'ELSE';
-
-CONDITIONAL: IF | (ELSE ' ' IF) | ELSE;
+IF: 'IF';
+ELSE: 'ELSE';
+BEGIN_IF: BEGIN ' ' IF;
+END_IF: END ' ' IF;
 LOOP: 'WHILE';
 
 // tokens
@@ -66,9 +87,9 @@ COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
 WS: ' ' -> skip;
 ESCAPE: '[' .+? ']';
 
-fragment BEGIN: 'BEGIN';
-fragment END: 'END';
-fragment CODE: 'CODE';
+BEGIN: 'BEGIN';
+END: 'END';
+CODE: 'CODE';
 
 BEGIN_CODE: BEGIN ' ' CODE;
 END_CODE: END ' ' CODE;
@@ -86,8 +107,8 @@ SCAN: 'SCAN:';
 DISPLAY: 'DISPLAY';
 
 // reserve words
-RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
-    LOOP | DISPLAY | SCAN | 'BEGIN IF';
+RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
+    LOOP | DISPLAY | SCAN;
 
 EQUALS: '=';
 COMMA: ',';
