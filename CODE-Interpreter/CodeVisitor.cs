@@ -21,7 +21,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitScan([NotNull] CodeParser.ScanContext context)
     {
-        IList<ITerminalNode> identifiers = context.IDENTIFIER();
+        IList<ITerminalNode> identifiers = context.IDENTIFIER(); //kwaon ra niya ang identifier
         List<string> varNames = new List<string>();
 
         // Loop through each identifier and create a variable object for it
@@ -58,21 +58,28 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             switch (variable.DataType)
             {
                 case "INT":
-                    if (!int.TryParse(inputValue, out _))
+                    if (!int.TryParse(inputValue, out int intValue))
                     {
                         throw new Exception($"Error: Invalid value '{inputValue}' for INT variable '{variable.Identifier}'.");
                     }
+                    variable.Value = intValue;
                     break;
                 case "FLOAT":
-                    if (!float.TryParse(inputValue, out _))
+                    if (!float.TryParse(inputValue, out float floatValue))
                     {
                         throw new Exception($"Error: Invalid value '{inputValue}' for FLOAT variable '{variable.Identifier}'.");
                     }
                     break;
                 case "BOOL":
-                    if (!bool.TryParse(inputValue, out _))
+                    if (!bool.TryParse(inputValue, out bool boolValue))
                     {
                         throw new Exception($"Error: Invalid value '{inputValue}' for BOOL variable '{variable.Identifier}'.");
+                    }
+                    break;
+                case "CHAR":
+                    if (!char.TryParse(inputValue, out char charValue))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for CHAR variable '{variable.Identifier}'.");
                     }
                     break;
             }
@@ -87,6 +94,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 variable.Value = float.Parse(inputValue);
             }
             else if (variable.DataType == "BOOL")
+            {
+                variable.Value = bool.Parse(inputValue);
+            }
+            else if (variable.DataType == "STRING")
             {
                 variable.Value = bool.Parse(inputValue);
             }

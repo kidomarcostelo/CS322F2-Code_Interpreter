@@ -2,5 +2,5 @@
 BEGIN CODE
 	INT x, y, z
 	SCAN: x, y, z
-	DISPLAY: x
+	DISPLAY: x & " " & y & " " & z
 END CODE
