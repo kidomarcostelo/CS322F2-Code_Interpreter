@@ -1,4 +1,7 @@
 BEGIN CODE
-	INT x = -5 
+	INT y = 5, t = 4
+	FLOAT e = 2.5
+	FLOAT x = 5 <> 2
+	#INT x = y / e
 	DISPLAY: x
 END CODE
