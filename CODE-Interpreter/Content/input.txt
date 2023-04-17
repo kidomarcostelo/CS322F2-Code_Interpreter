@@ -1,7 +1,6 @@
+# asdasdasd
 BEGIN CODE
-	INT y = 5, t = 4
-	FLOAT e = 2.5
-	FLOAT x = 5 <> 2
-	#INT x = y / e
-	DISPLAY: x
+	INT x, y, z
+	SCAN: x, y, z
+	DISPLAY: x & " " & y & " " & z
 END CODE
