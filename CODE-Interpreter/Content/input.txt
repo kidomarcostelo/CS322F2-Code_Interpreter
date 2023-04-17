@@ -1,4 +1,6 @@
+# asdasdasd
 BEGIN CODE
-	INT x = -5 
-	DISPLAY: x
+	INT x, y, z
+	SCAN: x, y, z
+	DISPLAY: x & " " & y & " " & z
 END CODE
