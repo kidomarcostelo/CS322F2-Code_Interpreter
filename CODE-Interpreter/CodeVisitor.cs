@@ -192,6 +192,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                     value = value.ToString()!.ToUpper();
                 }
 
+               // if()
 
                 existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
                 _variables.Add(existingVar);
@@ -367,6 +368,39 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return $"{left}{right}";
     }
 
+    public override object VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
+    {
+        //var left = Visit(context.expression(0));
+        //var right = Visit(context.expression(1));
+
+        //var op = context.multOp().GetText();
+
+        //return op switch
+        //{
+        //    "*" => Multiply(left, right),
+        //    "/" => Divide(left, right),
+        //    "%" => Modulo(left, right),
+        //    _ => throw new NotImplementedException()
+        //};
+
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+
+        var temp = context.compareOp().GetText();
+
+        return temp switch
+        {
+            "<" => LesserThan(left, right),
+            ">" => GreaterThan(left, right),
+            "<=" => LesserThanOrEqualTo(left, right),
+            ">=" => GreaterThanOrEqualTo(left, right),
+            "==" => Equal(left, right),
+            "<>" => NotEqual(left, right),
+            _ => throw new NotImplementedException()
+        };
+
+    }
+
     public override object VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
     {
         return "\n";
@@ -439,7 +473,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l / r;
-        
+
         if (left is float lf && right is float rf)
             return lf / rf;
 
@@ -468,6 +502,80 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         
         //if (left is float lFloat && right is int rInt)
         //    return lFloat % rInt;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? LesserThan(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l < r;
+        if(left is float lf && right is float rf)
+            return lf < rf;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? GreaterThan(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l > r;
+        if (left is float lf && right is float rf)
+            return lf > rf;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? GreaterThanOrEqualTo(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l >= r;
+        if (left is float lf && right is float rf)
+            return lf >= rf;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? LesserThanOrEqualTo(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l <= r;
+        if (left is float lf && right is float rf)
+            return lf <= rf;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? Equal(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l == r;
+        if (left is float lf && right is float rf)
+            return lf == rf;
+        if (left is char lc && right is char rc)
+            return lc == rc;
+        if(left is bool lb && right is bool rb)
+            return lb == rb;
+
+        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? NotEqual(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l != r;
+        if (left is float lf && right is float rf)
+            return lf != rf;
+        if (left is char lc && right is char rc)
+            return lc != rc;
+        if (left is bool lb && right is bool rb)
+            return lb != rb;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
