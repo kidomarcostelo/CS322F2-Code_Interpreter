@@ -45,14 +45,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         // Ask user for input
         Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
         string inputLine = Console.ReadLine();
-        string[] inputValues = inputLine.Split(',');
+        string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         // Loop through each input value and validate it based on the variable's data type,
         // then parse and assign it to the corresponding var
         for (int i = 0; i < identifiers.Count; i++)
         {
             Variable variable = _variables.First(v => v.Identifier == identifiers[i].GetText());
-            string inputValue = inputValues[i];
+            string inputValue = inputValues[i].Trim();
 
             // Validate the value inputted by the user based on the variable's data type
             switch (variable.DataType)
@@ -77,10 +77,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                     }
                     break;
                 case "CHAR":
-                    if (!char.TryParse(inputValue, out char charValue))
+                    if (inputValue.Length != 1 || char.IsWhiteSpace(inputValue[0]))
                     {
                         throw new Exception($"Error: Invalid value '{inputValue}' for CHAR variable '{variable.Identifier}'.");
                     }
+                    variable.Value = inputValue[0];
+                    break;
+                default:
+                    variable.Value = inputValue;
                     break;
             }
 
@@ -97,9 +101,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             {
                 variable.Value = bool.Parse(inputValue);
             }
-            else if (variable.DataType == "STRING")
+            else if (variable.DataType == "CHAR")
             {
-                variable.Value = bool.Parse(inputValue);
+                variable.Value = char.Parse(inputValue);
             }
             else
             {
