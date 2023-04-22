@@ -2,19 +2,19 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall | conditionalExpression)*)?;
+statement: (NEWLINE TAB declaration | functionCall)* ((NEWLINE TAB declaration)+ (NEWLINE TAB (executable | functionCall))*)?;
 
 //statement: conditionalFunction;
 
-declaration:  NEWLINE TAB initialization;
+declaration: initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
+executable: IDENTIFIER (equalsOp expression);
 
-functionCall: NEWLINE TAB (display | scan);
+functionCall: (display | scan | ifBlock | whileBlock | forBlock);
  
 display: NEWLINE? DISPLAY ':' expression NEWLINE?;
 
@@ -42,17 +42,26 @@ boolExpression
     | expression logicOp expression
     ;
 
-conditionalExpression: NEWLINE TAB ifBlock;
+//conditionalExpression:  ifBlock;
 
 ifBlock: IF (boolExpression) conditionalBlock (elseIfBlock)?;
 
-elseIfBlock: NEWLINE TAB ELSE (conditionalBlock | ifBlock);
+elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock);
 
 conditionalBlock: 
-                NEWLINE TAB BEGIN_IF 
-                    (NEWLINE TAB TAB (display | scan | IDENTIFIER (equalsOp expression)))* 
-                NEWLINE TAB END_IF;
+                NEWLINE TAB+ BEGIN_IF 
+                    (NEWLINE TAB+ (executable | functionCall))* 
+                NEWLINE TAB+ END_IF;
 
+whileBlock: WHILE (boolExpression)
+            NEWLINE TAB+ BEGIN_WHILE
+                (NEWLINE TAB+ (executable | functionCall))* 
+            NEWLINE TAB+ END_WHILE;
+
+forBlock: FOR ('(' assignment ',' boolExpression ',' executable ')')
+            NEWLINE TAB+ BEGIN_FOR
+                (NEWLINE TAB+ (executable | functionCall))* 
+            NEWLINE TAB+ END_FOR;
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -78,7 +87,13 @@ IF: 'IF';
 ELSE: 'ELSE';
 BEGIN_IF: BEGIN ' ' IF;
 END_IF: END ' ' IF;
-LOOP: 'WHILE';
+WHILE: 'WHILE';
+BEGIN_WHILE: BEGIN ' ' WHILE;
+END_WHILE: END ' ' WHILE;
+FOR: 'FOR';
+BEGIN_FOR: BEGIN ' ' FOR;
+END_FOR: END ' ' FOR;
+
 
 // tokens
 NEWLINE: ('\r\n');
@@ -108,7 +123,7 @@ DISPLAY: 'DISPLAY';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
-    LOOP | DISPLAY | SCAN;
+    WHILE | DISPLAY | SCAN;
 
 EQUALS: '=';
 COMMA: ',';
