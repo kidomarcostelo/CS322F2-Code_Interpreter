@@ -243,6 +243,21 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null;
     }
 
+    public override object VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var logicop = context.logicOp().GetText();
+
+        return logicop switch
+        {
+            "AND" => ANDLogic(left, right),
+            "OR" => ORLogic(left, right),
+            "NOT" => NOTLogic(left),
+            _ => throw new InvalidOperationException("Unknown operator")
+        };
+    }
+
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
         string identifier = context.identifier().GetText();
@@ -601,6 +616,42 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return lb != rb;
 
         throw new Exception($"Cannot compare not equal values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    public static object ANDLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left && (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object ORLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left || (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object NOTLogic(object? left)
+    {
+        if (left is bool b)
+        {
+            return !b;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
     }
 
     private object? isVariable(object? obj)

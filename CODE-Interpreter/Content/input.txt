@@ -1,6 +1,8 @@
 # asdasdasd
 BEGIN CODE
-	INT x, y, z
-	SCAN: x, y, z
-	DISPLAY: x & " " & y & " " & z
+	INT a=100, b=200, c=300 
+	BOOL e, d="FALSE"
+	d = (a < b AND c <>200)
+	e = (a < b NOT c <>200)
+	DISPLAY: d & e
 END CODE
