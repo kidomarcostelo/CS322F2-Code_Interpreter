@@ -22,7 +22,7 @@ scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
 expression
     : constant                              #constantExpression
-    | IDENTIFIER                            #identifierExpression
+    | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
@@ -53,6 +53,8 @@ concat: '&';
 newline: '$';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
+
+identifier: IDENTIFIER;
 
 // control flow structures
 fragment IF: 'IF';

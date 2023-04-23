@@ -8,49 +8,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
-    private Dictionary<string, object?> Functions { get; } = new();
 
-    public CodeVisitor()
+    public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        //Functions["DISPLAY:"] = new Func<object?[], object?>(Display);
-    }
-
-    //private object? Display(object?[] args)
-    //{
-    //    foreach (var arg in args)
-    //    {
-    //        var displayObj = isVariable(arg);
-
-    //        if (displayObj is bool b)
-    //             displayObj = b.ToString().ToUpper();
-            
-    //        Console.Write(displayObj);
-    //    }
-    //    return args;
-    //}
-
-    //public override object? VisitFunctionCall([NotNull] CodeParser.FunctionCallContext context)
-    //{
-    //    var name = context.DISPLAY().GetText();
-    //    var args = context.expression().children.Select(Visit).ToArray();
-
-    //    if (!Functions.ContainsKey(name))
-    //    {
-    //        throw new Exception($"Function {name} is not defined.");
-    //    }
-
-    //    if (Functions[name] is not Func<object?[], object?> func)
-    //    {
-    //        throw new Exception($"Variable {name} is not a function.");
-    //    }
-    //    return func(args);
-    //}
-
-    public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
-    {
-        var args = context.expression().children.Select(Visit).ToArray();
-
-        var args = context.expression();
+        var args = context.expression().children.Select(Visit).ToList();
 
         foreach (var arg in args)
         {
@@ -64,18 +25,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return null;
     }
-
-    //public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
-    //{
-    //    var exp = Visit(context.expression());
-    //    exp = isVariable(exp);
-
-    //    if (exp is bool b)
-    //        exp = b.ToString().ToUpper();
-
-    //    Console.Write(exp + " ");
-    //    return new object();
-    //}
 
     public override object? VisitScan([NotNull] CodeParser.ScanContext context)
     {
@@ -296,7 +245,22 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null;
     }
 
-    public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+
+    public override object? VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    {
+        string identifier = context.identifier().GetText();
+
+        if (_variables.Any(p => p.Identifier == identifier))
+        {
+            return _variables.Find(p => p.Identifier == identifier);
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
+        }
+    }
+
+    public override object VisitIdentifier([NotNull] CodeParser.IdentifierContext context)
     {
         string identifier = context.IDENTIFIER().GetText();
 
