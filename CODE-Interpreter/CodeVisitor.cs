@@ -332,7 +332,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         object right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
-
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
         return op switch
         {
             "+" => Add(left, right),
@@ -347,7 +350,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         var right = Visit(context.expression(1));
         
         var op = context.multOp().GetText();
-
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
         return op switch
         {
             "*" => Multiply(left, right),
@@ -385,9 +391,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
         var temp = context.compareOp().GetText();
-
+        
         return temp switch
         {
             "<" => LesserThan(left, right),
@@ -408,8 +417,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Add (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l + r;
@@ -448,8 +455,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Multiply (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l * r;
@@ -468,8 +473,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Divide (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l / r;
@@ -488,8 +491,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Modulo (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l % r;
