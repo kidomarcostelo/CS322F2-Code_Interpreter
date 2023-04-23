@@ -12,9 +12,11 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
 
-functionCall: NEWLINE TAB (display | scan);
+//functionCall: NEWLINE TAB (display | scan);
+
+functionCall: NEWLINE TAB (DISPLAY expression | scan);
  
-display: NEWLINE? DISPLAY ':' expression NEWLINE?;
+display: NEWLINE? DISPLAY expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
@@ -83,7 +85,7 @@ STRINGVAL: '"' (.*?) '"';
 
 // functions
 SCAN: 'SCAN:';
-DISPLAY: 'DISPLAY';
+DISPLAY: 'DISPLAY:';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
