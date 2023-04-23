@@ -443,7 +443,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat - rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot subtract values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Multiply (object? left, object? right)
@@ -463,7 +463,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat * rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot multiply values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Divide (object? left, object? right)
@@ -483,7 +483,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat / rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot divide values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Modulo (object? left, object? right)
@@ -503,7 +503,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat % rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot modulo values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? LesserThan(object? left, object? right)
@@ -514,7 +514,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if(left is float lf && right is float rf)
             return lf < rf;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot < values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? GreaterThan(object? left, object? right)
@@ -525,7 +525,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf > rf;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot > values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? GreaterThanOrEqualTo(object? left, object? right)
@@ -536,7 +536,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf >= rf;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot >= values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? LesserThanOrEqualTo(object? left, object? right)
@@ -547,7 +547,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf <= rf;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot <= values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? Equal(object? left, object? right)
@@ -562,7 +562,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if(left is bool lb && right is bool rb)
             return lb == rb;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot compare equal values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private bool? NotEqual(object? left, object? right)
@@ -577,7 +577,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is bool lb && right is bool rb)
             return lb != rb;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot compare not equal values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? isVariable(object? obj)
