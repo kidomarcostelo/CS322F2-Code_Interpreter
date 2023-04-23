@@ -1,6 +1,11 @@
 # asdasdasd
 BEGIN CODE
 	INT x, y, z
-	SCAN: x, y, z
-	DISPLAY: x & " " & y & " " & z
+	BOOL b1, b2, b3
+	CHAR c1, c2, c3
+	FLOAT f1, f2, f3
+	SCAN: x, y, z, b1, b2, b3, c1, c2, c3, f1, f2, f3
+	INT j
+	j = x + y * z / 2
+	DISPLAY: x & " " & y & " " & z & " " & b1 & " " & b2 & " " & b3 & " " & c1 & " " & c2 & " " & c3 & " " & f1 & " " & f2 & " " & f3 & " " & j
 END CODE

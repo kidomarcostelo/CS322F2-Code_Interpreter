@@ -53,14 +53,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         // Ask user for input
         Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
         string inputLine = Console.ReadLine();
-        string[] inputValues = inputLine.Split(',');
+        string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         // Loop through each input value and validate it based on the variable's data type,
         // then parse and assign it to the corresponding var
         for (int i = 0; i < identifiers.Count; i++)
         {
             Variable variable = _variables.First(v => v.Identifier == identifiers[i].GetText());
-            string inputValue = inputValues[i];
+            string inputValue = inputValues[i].Trim();
 
             // Validate the value inputted by the user based on the variable's data type
             switch (variable.DataType)
@@ -85,10 +85,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                     }
                     break;
                 case "CHAR":
-                    if (!char.TryParse(inputValue, out char charValue))
+                    if (inputValue.Length != 1 || char.IsWhiteSpace(inputValue[0]))
                     {
                         throw new Exception($"Error: Invalid value '{inputValue}' for CHAR variable '{variable.Identifier}'.");
                     }
+                    variable.Value = inputValue[0];
+                    break;
+                default:
+                    variable.Value = inputValue;
                     break;
             }
 
@@ -105,9 +109,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             {
                 variable.Value = bool.Parse(inputValue);
             }
-            else if (variable.DataType == "STRING")
+            else if (variable.DataType == "CHAR")
             {
-                variable.Value = bool.Parse(inputValue);
+                variable.Value = char.Parse(inputValue);
             }
             else
             {
@@ -243,6 +247,21 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null;
     }
 
+    public override object VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var logicop = context.logicOp().GetText();
+
+        return logicop switch
+        {
+            "AND" => ANDLogic(left, right),
+            "OR" => ORLogic(left, right),
+            "NOT" => NOTLogic(left),
+            _ => throw new InvalidOperationException("Unknown operator")
+        };
+    }
+
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
         string identifier = context.identifier().GetText();
@@ -348,7 +367,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return content;
     }
 
-    public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
+    public override object? VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
         object left = Visit(context.expression(0));
         object right = Visit(context.expression(1));
@@ -366,7 +385,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         };
     }
 
-    public override object VisitMultiplicativeExpression([NotNull] CodeParser.MultiplicativeExpressionContext context)
+    public override object? VisitMultiplicativeExpression([NotNull] CodeParser.MultiplicativeExpressionContext context)
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
@@ -396,7 +415,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return $"{left}{right}";
     }
 
-    public override object VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
+    public override object? VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
     {
         //var left = Visit(context.expression(0));
         //var right = Visit(context.expression(1));
@@ -601,6 +620,42 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             return lb != rb;
 
         throw new Exception($"Cannot compare not equal values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    public static object ANDLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left && (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object ORLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left || (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object NOTLogic(object? left)
+    {
+        if (left is bool b)
+        {
+            return !b;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
     }
 
     private object? isVariable(object? obj)
