@@ -12,9 +12,9 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
 
-//functionCall: NEWLINE TAB (display | scan);
+functionCall: NEWLINE TAB (display | scan);
 
-functionCall: NEWLINE TAB (DISPLAY expression | scan);
+//functionCall: NEWLINE TAB (DISPLAY expression | scan);
  
 display: NEWLINE? DISPLAY expression NEWLINE?;
 

@@ -12,38 +12,57 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public CodeVisitor()
     {
-        Functions["DISPLAY:"] = new Func<object?[], object?>(Display);
+        //Functions["DISPLAY:"] = new Func<object?[], object?>(Display);
     }
 
-    private object? Display(object?[] args)
+    //private object? Display(object?[] args)
+    //{
+    //    foreach (var arg in args)
+    //    {
+    //        var displayObj = isVariable(arg);
+
+    //        if (displayObj is bool b)
+    //             displayObj = b.ToString().ToUpper();
+            
+    //        Console.Write(displayObj);
+    //    }
+    //    return args;
+    //}
+
+    //public override object? VisitFunctionCall([NotNull] CodeParser.FunctionCallContext context)
+    //{
+    //    var name = context.DISPLAY().GetText();
+    //    var args = context.expression().children.Select(Visit).ToArray();
+
+    //    if (!Functions.ContainsKey(name))
+    //    {
+    //        throw new Exception($"Function {name} is not defined.");
+    //    }
+
+    //    if (Functions[name] is not Func<object?[], object?> func)
+    //    {
+    //        throw new Exception($"Variable {name} is not a function.");
+    //    }
+    //    return func(args);
+    //}
+
+    public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
+        var args = context.expression().children.Select(Visit).ToArray();
+
+        var args = context.expression();
+
         foreach (var arg in args)
         {
             var displayObj = isVariable(arg);
 
             if (displayObj is bool b)
-                 displayObj = b.ToString().ToUpper();
-            
+                displayObj = b.ToString().ToUpper();
+
             Console.Write(displayObj);
         }
-        return args;
-    }
 
-    public override object? VisitFunctionCall([NotNull] CodeParser.FunctionCallContext context)
-    {
-        var name = context.DISPLAY().GetText();
-        var args = context.expression().children.Select(Visit).ToArray();
-
-        if (!Functions.ContainsKey(name))
-        {
-            throw new Exception($"Function {name} is not defined.");
-        }
-
-        if (Functions[name] is not Func<object?[], object?> func)
-        {
-            throw new Exception($"Variable {name} is not a function.");
-        }
-        return func(args);
+        return null;
     }
 
     //public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
