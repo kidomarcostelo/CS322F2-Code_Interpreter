@@ -4,6 +4,7 @@ using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using static Antlr4.Runtime.Atn.SemanticContext;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
@@ -257,9 +258,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             "AND" => ANDLogic(left, right),
             "OR" => ORLogic(left, right),
-            "NOT" => NOTLogic(left),
             _ => throw new InvalidOperationException("Unknown operator")
         };
+    }
+
+    public override object VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
+    {
+        var expression = Visit(context.expression());
+        return NOTLogic(expression);
     }
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
@@ -646,9 +652,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
-    public static object NOTLogic(object? left)
+    public static object NOTLogic(object? logic)
     {
-        if (left is bool b)
+        if (logic is bool b)
         {
             return !b;
         }

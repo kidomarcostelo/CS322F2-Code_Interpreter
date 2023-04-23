@@ -24,6 +24,7 @@ expression
     : constant                              #constantExpression
     | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
+    | 'NOT' expression                        #notExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
     | expression multOp expression          #multiplicativeExpression
@@ -48,7 +49,7 @@ compareOp
     ;
     
 equalsOp: EQUALS; 
-logicOp: 'AND' | 'OR' | 'NOT';
+logicOp: 'AND' | 'OR';
 concat: '&';
 newline: '$';
 
