@@ -1,8 +1,11 @@
 # asdasdasd
 BEGIN CODE
-	INT a=100, b=200, c=300 
-	BOOL e, d="FALSE"
-	d = (a < b AND c <>200)
-	e = (a < b NOT c <>200)
-	DISPLAY: d & e
+	INT x, y, z
+	BOOL b1, b2, b3
+	CHAR c1, c2, c3
+	FLOAT f1, f2, f3
+	SCAN: x, y, z, b1, b2, b3, c1, c2, c3, f1, f2, f3
+	INT j
+	j = x + y * z / 2
+	DISPLAY: x & " " & y & " " & z & " " & b1 & " " & b2 & " " & b3 & " " & c1 & " " & c2 & " " & c3 & " " & f1 & " " & f2 & " " & f3 & " " & j
 END CODE
