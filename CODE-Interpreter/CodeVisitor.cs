@@ -9,15 +9,23 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
 
-    public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
+    public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        var exp = Visit(context.expression());
+        var args = context.expression().children.Select(Visit).ToList();
 
-        exp = isVariable(exp);
+        foreach (var arg in args)
+        {
+            var displayObj = isVariable(arg);
 
-        Console.Write(exp + " ");
-        return new object();
+            if (displayObj is bool b)
+                displayObj = b.ToString().ToUpper();
+
+            Console.Write(displayObj);
+        }
+
+        return null;
     }
+
 
     public override object? VisitScan([NotNull] CodeParser.ScanContext context)
     {
@@ -236,6 +244,20 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     }
 
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    {
+        string identifier = context.identifier().GetText();
+
+        if (_variables.Any(p => p.Identifier == identifier))
+        {
+            return _variables.Find(p => p.Identifier == identifier)!;
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
+        }
+    }
+
+    public override object VisitIdentifier([NotNull] CodeParser.IdentifierContext context)
     {
         string identifier = context.IDENTIFIER().GetText();
 

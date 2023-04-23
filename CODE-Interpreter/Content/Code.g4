@@ -13,14 +13,16 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
 
 functionCall: NEWLINE TAB (display | scan);
+
+//functionCall: NEWLINE TAB (DISPLAY expression | scan);
  
-display: NEWLINE? DISPLAY ':' expression NEWLINE?;
+display: NEWLINE? DISPLAY expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
 expression
     : constant                              #constantExpression
-    | IDENTIFIER                            #identifierExpression
+    | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
@@ -51,6 +53,8 @@ concat: '&';
 newline: '$';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
+
+identifier: IDENTIFIER;
 
 // control flow structures
 fragment IF: 'IF';
@@ -83,7 +87,7 @@ STRINGVAL: '"' (.*?) '"';
 
 // functions
 SCAN: 'SCAN:';
-DISPLAY: 'DISPLAY';
+DISPLAY: 'DISPLAY:';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
@@ -93,3 +97,4 @@ EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
+
