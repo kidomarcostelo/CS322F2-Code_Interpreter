@@ -418,6 +418,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         left = isVariable(left);
         right = isVariable(right);
 
+        if (left is bool lb)
+            left = lb.ToString().ToUpper();
+
+        if (right is bool rb)
+            right = rb.ToString().ToUpper();
+
         return $"{left}{right}";
     }
 

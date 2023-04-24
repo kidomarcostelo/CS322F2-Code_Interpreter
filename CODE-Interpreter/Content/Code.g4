@@ -24,7 +24,7 @@ expression
     : constant                              #constantExpression
     | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
-    | 'NOT' expression                        #notExpression
+    | 'NOT' expression                      #notExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
     | expression multOp expression          #multiplicativeExpression
