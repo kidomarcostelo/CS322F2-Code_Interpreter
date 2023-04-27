@@ -12,17 +12,25 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        var args = context.expression().children.Select(Visit).ToList();
+        //var args = context.expression().children.Select(Visit).ToList();
 
-        foreach (var arg in args)
-        {
-            var displayObj = isVariable(arg);
 
-            if (displayObj is bool b)
-                displayObj = b.ToString().ToUpper();
+        var args = Visit(context.expression());
+        //foreach (var arg in args)
+        //{
+        //    var displayObj = isVariable(arg);
 
-            Console.Write(displayObj);
-        }
+        //    if (displayObj is bool b)
+        //        displayObj = b.ToString().ToUpper();
+
+        //    Console.Write(displayObj);
+        //}
+        var displayObj = isVariable(args);
+
+        if (displayObj is bool b)
+            displayObj = b.ToString().ToUpper();
+
+        Console.Write(displayObj);
 
         return null;
     }
@@ -202,7 +210,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
                     }
 
-                    value = value.ToString()!.ToUpper();
+                    //value = value.ToString()!.ToUpper();
                 }
 
                // if()
@@ -250,9 +258,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
     {
-        var left = Visit(context.expression(0));
-        var right = Visit(context.expression(1));
+        object left = Visit(context.expression(0));
+        object right = Visit(context.expression(1));
         var logicop = context.logicOp().GetText();
+
+        left = isVariable(left);
+        right = isVariable(right);
 
         return logicop switch
         {
@@ -412,8 +423,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
     {
-        var left = Visit(context.expression(0));
-        var right = Visit(context.expression(1));
+        object left = Visit(context.expression(0));
+        object right = Visit(context.expression(1));
 
         left = isVariable(left);
         right = isVariable(right);
@@ -636,9 +647,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public static object ANDLogic(object? left, object? right)
     {
-        if (left is bool && right is bool)
+        if (left is bool l && right is bool r)
         {
-            return (bool)left && (bool)right;
+            return l && r;
         }
         else
         {
