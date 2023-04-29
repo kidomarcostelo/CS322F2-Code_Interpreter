@@ -37,24 +37,24 @@ expression
     ;   
 
 boolExpression
-    : identifier                        #identifierExpression
-    | '(' expression ')'                #parethesizedExpression
-    | expression compareOp expression   #comparativeExpression
-    | expression logicOp expression     #logicalExpression
+    : identifier                        #identifierBoolExpression
+    | '(' expression ')'                #parethesizedBoolExpression
+    | expression compareOp expression   #comparativeBoolExpression
+    | expression logicOp expression     #logicalBoolExpression
     ;
 
 //conditionalExpression:  ifBlock;
 
-ifBlock: IF '('boolExpression')' conditionalBlock (elseIfBlock)?;
+ifBlock: IF '(' boolExpression ')' conditionalBlock (elseIfBlock)?;
 
-elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock);
+elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock); 
 
 conditionalBlock: 
                 NEWLINE TAB+ BEGIN_IF 
                     (NEWLINE TAB+ (executable | functionCall))* 
                 NEWLINE TAB+ END_IF;
 
-whileBlock: WHILE (boolExpression)
+whileBlock: WHILE '(' boolExpression ')'
             NEWLINE TAB+ BEGIN_WHILE
                 (NEWLINE TAB+ (executable | functionCall))* 
             NEWLINE TAB+ END_WHILE;
