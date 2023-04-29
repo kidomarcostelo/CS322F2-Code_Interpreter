@@ -2,9 +2,9 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (NEWLINE TAB declaration | functionCall)* ((NEWLINE TAB declaration)+ (NEWLINE TAB (executable | functionCall))*)?;
+statement: (NEWLINE TAB (declaration | functionCall))* ((NEWLINE TAB declaration)+ (NEWLINE TAB (executable | functionCall))*)?;
 
-//statement: conditionalFunction;
+//statement: NEWLINE TAB functionCall;
 
 declaration: initialization;
 
@@ -14,9 +14,9 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: IDENTIFIER (equalsOp expression);
 
-functionCall: NEWLINE TAB (display | scan);
+functionCall: (display | scan | ifBlock | whileBlock | forBlock);
  
-display: NEWLINE? DISPLAY ':' expression NEWLINE?;
+display: DISPLAY expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
@@ -45,7 +45,7 @@ boolExpression
 
 //conditionalExpression:  ifBlock;
 
-ifBlock: IF (boolExpression) conditionalBlock (elseIfBlock)?;
+ifBlock: IF '('boolExpression')' conditionalBlock (elseIfBlock)?;
 
 elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock);
 
@@ -126,10 +126,11 @@ DISPLAY: 'DISPLAY:';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
-    WHILE | DISPLAY | SCAN;
+    WHILE | 'DISPLAY' | 'SCAN';
 
 EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
+
 
