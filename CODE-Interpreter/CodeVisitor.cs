@@ -3,14 +3,16 @@ using Antlr4.Runtime.Tree;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
+using System.Configuration;
 using System.Linq.Expressions;
 using static Antlr4.Runtime.Atn.SemanticContext;
+using static CODE_Interpreter.Content.CodeParser;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
 
-    public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
+    public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context) // need e modify na if naay if block dili e display if di true
     {
         var exp = Visit(context.expression());
 
@@ -344,7 +346,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     }
     public override object VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
     {
-        return Visit(context.expression());
+        return Visit(context.expression())!;
     }
 
     public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
@@ -411,13 +413,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-        
+
         left = isVariable(left);
         right = isVariable(right);
         
-        var temp = context.compareOp().GetText();
+        var op = context.compareOp().GetText();
         
-        return temp switch
+        return op switch
         {
             "<" => LesserThan(left, right),
             ">" => GreaterThan(left, right),
@@ -427,7 +429,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             "<>" => NotEqual(left, right),
             _ => throw new NotImplementedException()
         };
-
     }
 
     public override object VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
@@ -635,6 +636,102 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             throw new ArgumentException("INVALID DATA TYPE");
         }
+    }
+
+    public override object VisitIfBlock([NotNull] CodeParser.IfBlockContext context)
+    {
+        // evaluate the boolean expression in the if statement
+        bool temp = (bool)Visit(context.boolExpression())!;
+
+        // if the condition is true, execute the statements in the if block
+        if (temp)
+        {
+            Visit(context.conditionalBlock());
+        }
+
+        else if(context.elseIfBlock() is CodeParser.ElseIfBlockContext)
+        {
+            Visit(context.elseIfBlock());
+        }
+
+        return null!;
+    }
+
+    public override object VisitElseIfBlock([NotNull] CodeParser.ElseIfBlockContext context)
+    {
+        if (context.conditionalBlock() is CodeParser.ConditionalBlockContext)
+        {
+            Visit(context.conditionalBlock());
+        }
+        else if (context.ifBlock() is CodeParser.IfBlockContext)
+        {
+            Visit(context.ifBlock());
+        }
+
+        return null!;
+    }
+
+    public override object VisitBoolIdentifierExpression([NotNull] CodeParser.BoolIdentifierExpressionContext context)
+    {
+        string identifier = context.IDENTIFIER().GetText();
+
+        if (_variables.Any(p => p.Identifier == identifier))
+        {
+            var temp = _variables.Find(p => p.Identifier == identifier);
+            if (temp.DataType == "BOOL")
+            {
+                return temp.Value!;
+            }
+            else
+            {
+                throw new Exception(string.Format("Defined variable is not of type bool"));
+            }
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
+        }
+    }
+
+    public override object VisitBoolLogicalExpression([NotNull] CodeParser.BoolLogicalExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var logicop = context.logicOp().GetText();
+
+        return logicop switch
+        {
+            "AND" => ANDLogic(left, right),
+            "OR" => ORLogic(left, right),
+            _ => throw new InvalidOperationException("Unknown operator")
+        };
+    }
+
+    public override object VisitBoolComparativeExpression([NotNull] CodeParser.BoolComparativeExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+
+        left = isVariable(left);
+        right = isVariable(right);
+
+        var op = context.compareOp().GetText();
+
+        return op switch
+        {
+            "<" => LesserThan(left, right),
+            ">" => GreaterThan(left, right),
+            "<=" => LesserThanOrEqualTo(left, right),
+            ">=" => GreaterThanOrEqualTo(left, right),
+            "==" => Equal(left, right),
+            "<>" => NotEqual(left, right),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    public override object VisitBoolParethesizedExpression([NotNull] CodeParser.BoolParethesizedExpressionContext context)
+    {
+        return Visit(context.expression())!;
     }
 
     private object? isVariable(object? obj)

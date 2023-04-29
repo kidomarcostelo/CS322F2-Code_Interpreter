@@ -1,5 +1,28 @@
 # asdasdasd
 BEGIN CODE
-	INT x = -5 
+	BOOL t = "TRUE"
+	BOOL f = "FALSE"
+	INT x = 5;
+	IF (f)
+	BEGIN IF
+		DISPLAY: "IF"
+	END IF
+	ELSE IF (t)
+	BEGIN IF
+		IF (f)
+		BEGIN IF
+			DISPLAY: "NESTED ELSE IF TRUE"
+			x = 100;
+		END IF
+		ELSE IF (t)
+		BEGIN IF
+			DISPLAY: "NESTED ELSE IF FALSE"
+			x = 105 * 2 / 5;
+		END IF
+	END IF
+	ELSE
+	BEGIN IF
+		DISPLAY: "ELSE"
+	END IF
 	DISPLAY: x
 END CODE

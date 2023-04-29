@@ -37,10 +37,10 @@ expression
     ;   
 
 boolExpression
-    : IDENTIFIER
-    | '(' expression ')'  
-    | expression compareOp expression
-    | expression logicOp expression
+    : IDENTIFIER                            #boolIdentifierExpression
+    | '(' expression ')'                    #boolParethesizedExpression
+    | expression compareOp expression       #boolComparativeExpression
+    | expression logicOp expression         #boolLogicalExpression
     ;
 
 //conditionalExpression:  ifBlock;
