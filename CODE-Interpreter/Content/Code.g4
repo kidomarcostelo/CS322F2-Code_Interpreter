@@ -14,7 +14,7 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: IDENTIFIER (equalsOp expression);
 
-functionCall: (display | scan | ifBlock | whileBlock | forBlock);
+functionCall: NEWLINE TAB (display | scan);
  
 display: NEWLINE? DISPLAY ':' expression NEWLINE?;
 
@@ -22,8 +22,9 @@ scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
 expression
     : constant                              #constantExpression
-    | IDENTIFIER                            #identifierExpression
+    | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
+    | 'NOT' expression                      #notExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
     | expression multOp expression          #multiplicativeExpression
@@ -76,11 +77,13 @@ compareOp
     ;
     
 equalsOp: EQUALS; 
-logicOp: 'AND' | 'OR' | 'NOT';
+logicOp: 'AND' | 'OR';
 concat: '&';
 newline: '$';
 
 constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
+
+identifier: IDENTIFIER;
 
 // control flow structures
 IF: 'IF';
@@ -119,7 +122,7 @@ STRINGVAL: '"' (.*?) '"';
 
 // functions
 SCAN: 'SCAN:';
-DISPLAY: 'DISPLAY';
+DISPLAY: 'DISPLAY:';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
@@ -129,3 +132,4 @@ EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
+

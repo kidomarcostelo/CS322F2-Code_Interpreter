@@ -4,19 +4,119 @@ using CODE_Interpreter;
 using CODE_Interpreter.Content;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using static Antlr4.Runtime.Atn.SemanticContext;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
 
-    public override object VisitDisplay([NotNull] CodeParser.DisplayContext context)
+    public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
         var exp = Visit(context.expression());
 
-        exp = isVariable(exp);
+        if (exp is bool b)
+            exp = b.ToString().ToUpper();
 
+        exp = isVariable(exp);
         Console.Write(exp + " ");
+
         return new object();
+    }
+
+
+    public override object? VisitScan([NotNull] CodeParser.ScanContext context)
+    {
+        IList<ITerminalNode> identifiers = context.IDENTIFIER(); //kwaon ra niya ang identifier
+        List<string> varNames = new List<string>();
+
+        // Loop through each identifier and create a variable object for it
+        foreach (var identifier in identifiers)
+        {
+            string varName = identifier.GetText();
+
+            // Check if variable is already defined para pwede sya ma scan
+            if (!_variables.Any(v => v.Identifier == varName))
+            {
+                throw new Exception($"Error: Variable '{varName}' is not defined.");
+            }
+
+            varNames.Add(varName);
+
+            // Create a new Variable object with default values and add it to the list
+            Variable variable = new Variable { Identifier = varName, DataType = "UNKNOWN", Value = null };
+            _variables.Add(variable);
+        }
+
+        // Ask user for input
+        //Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
+        string inputLine = Console.ReadLine();
+        string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+        // Loop through each input value and validate it based on the variable's data type,
+        // then parse and assign it to the corresponding var
+        for (int i = 0; i < identifiers.Count; i++)
+        {
+            Variable variable = _variables.First(v => v.Identifier == identifiers[i].GetText());
+            string inputValue = inputValues[i].Trim();
+
+            // Validate the value inputted by the user based on the variable's data type
+            switch (variable.DataType)
+            {
+                case "INT":
+                    if (!int.TryParse(inputValue, out int intValue))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for INT variable '{variable.Identifier}'.");
+                    }
+                    variable.Value = intValue;
+                    break;
+                case "FLOAT":
+                    if (!float.TryParse(inputValue, out float floatValue))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for FLOAT variable '{variable.Identifier}'.");
+                    }
+                    break;
+                case "BOOL":
+                    if (!bool.TryParse(inputValue, out bool boolValue))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for BOOL variable '{variable.Identifier}'.");
+                    }
+                    break;
+                case "CHAR":
+                    if (inputValue.Length != 1 || char.IsWhiteSpace(inputValue[0]))
+                    {
+                        throw new Exception($"Error: Invalid value '{inputValue}' for CHAR variable '{variable.Identifier}'.");
+                    }
+                    variable.Value = inputValue[0];
+                    break;
+                default:
+                    variable.Value = inputValue;
+                    break;
+            }
+
+            // Parse and assign input value to variable based on its data type
+            if (variable.DataType == "INT")
+            {
+                variable.Value = int.Parse(inputValue);
+            }
+            else if (variable.DataType == "FLOAT")
+            {
+                variable.Value = float.Parse(inputValue);
+            }
+            else if (variable.DataType == "BOOL")
+            {
+                variable.Value = bool.Parse(inputValue);
+            }
+            else if (variable.DataType == "CHAR")
+            {
+                variable.Value = char.Parse(inputValue);
+            }
+            else
+            {
+                variable.Value = inputValue;
+            }
+        }
+
+        return null!;
     }
 
     // recognize variable
@@ -97,14 +197,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
 
                     }
-
-                    value = value.ToString()!.ToUpper();
                 }
 
 
                 existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
                 _variables.Add(existingVar);
-                //Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
             }
         }
         return null!;
@@ -112,18 +209,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
-        //var varName = context.IDENTIFIER().GetText();
-
-        //var expressions = context.expression();
-
-        //foreach (var expression in expressions)
-        //{
-        //    object value = Visit(expression);
-
-        //    _variables.Add(v => v.Value = value, v.Identifier = .....);
-        //}
-
-        //return null!;
         var variableName = context.IDENTIFIER().GetText();
         var expressions = context.expression();
 
@@ -143,7 +228,41 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null;
     }
 
+    public override object VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var logicop = context.logicOp().GetText();
+
+        return logicop switch
+        {
+            "AND" => ANDLogic(left, right),
+            "OR" => ORLogic(left, right),
+            _ => throw new InvalidOperationException("Unknown operator")
+        };
+    }
+
+    public override object VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
+    {
+        var expression = Visit(context.expression());
+        return NOTLogic(expression);
+    }
+
     public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    {
+        string identifier = context.identifier().GetText();
+
+        if (_variables.Any(p => p.Identifier == identifier))
+        {
+            return _variables.Find(p => p.Identifier == identifier)!;
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
+        }
+    }
+
+    public override object VisitIdentifier([NotNull] CodeParser.IdentifierContext context)
     {
         string identifier = context.IDENTIFIER().GetText();
 
@@ -173,7 +292,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return value;
     }
-    //comment lang sa nako dol para mugana concat
     public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         if (context.constant().INTEGERVAL() is { } i)
@@ -235,14 +353,16 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return content;
     }
 
-
-    public override object VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
+    public override object? VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
-        object left = Visit(context.expression(0));
-        object right = Visit(context.expression(1));
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
-
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
         return op switch
         {
             "+" => Add(left, right),
@@ -251,13 +371,16 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         };
     }
 
-    public override object VisitMultiplicativeExpression([NotNull] CodeParser.MultiplicativeExpressionContext context)
+    public override object? VisitMultiplicativeExpression([NotNull] CodeParser.MultiplicativeExpressionContext context)
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
         
         var op = context.multOp().GetText();
-
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
         return op switch
         {
             "*" => Multiply(left, right),
@@ -275,7 +398,36 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         left = isVariable(left);
         right = isVariable(right);
 
+        if (left is bool lb)
+            left = lb.ToString().ToUpper();
+
+        if (right is bool rb)
+            right = rb.ToString().ToUpper();
+
         return $"{left}{right}";
+    }
+
+    public override object? VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        
+        left = isVariable(left);
+        right = isVariable(right);
+        
+        var temp = context.compareOp().GetText();
+        
+        return temp switch
+        {
+            "<" => LesserThan(left, right),
+            ">" => GreaterThan(left, right),
+            "<=" => LesserThanOrEqualTo(left, right),
+            ">=" => GreaterThanOrEqualTo(left, right),
+            "==" => Equal(left, right),
+            "<>" => NotEqual(left, right),
+            _ => throw new NotImplementedException()
+        };
+
     }
 
     public override object VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
@@ -285,8 +437,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     private object? Add (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l + r;
@@ -320,13 +470,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat - rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot subtract values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Multiply (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l * r;
@@ -340,17 +488,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat * rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot multiply values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Divide (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l / r;
-        
+
         if (left is float lf && right is float rf)
             return lf / rf;
 
@@ -360,13 +506,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat / rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot divide values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
     private object? Modulo (object? left, object? right)
     {
-        left = isVariable(left);
-        right = isVariable(right);
 
         if (left is int l && right is int r)
             return l % r;
@@ -380,7 +524,117 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         //if (left is float lFloat && right is int rInt)
         //    return lFloat % rInt;
 
-        throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
+        throw new Exception($"Cannot modulo values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? LesserThan(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l < r;
+        if(left is float lf && right is float rf)
+            return lf < rf;
+
+        throw new Exception($"Cannot < values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? GreaterThan(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l > r;
+        if (left is float lf && right is float rf)
+            return lf > rf;
+
+        throw new Exception($"Cannot > values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? GreaterThanOrEqualTo(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l >= r;
+        if (left is float lf && right is float rf)
+            return lf >= rf;
+
+        throw new Exception($"Cannot >= values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? LesserThanOrEqualTo(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l <= r;
+        if (left is float lf && right is float rf)
+            return lf <= rf;
+
+        throw new Exception($"Cannot <= values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? Equal(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l == r;
+        if (left is float lf && right is float rf)
+            return lf == rf;
+        if (left is char lc && right is char rc)
+            return lc == rc;
+        if(left is bool lb && right is bool rb)
+            return lb == rb;
+
+        throw new Exception($"Cannot compare equal values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    private bool? NotEqual(object? left, object? right)
+    {
+
+        if (left is int l && right is int r)
+            return l != r;
+        if (left is float lf && right is float rf)
+            return lf != rf;
+        if (left is char lc && right is char rc)
+            return lc != rc;
+        if (left is bool lb && right is bool rb)
+            return lb != rb;
+
+        throw new Exception($"Cannot compare not equal values of types {left?.GetType()} and {right?.GetType()}.");
+    }
+
+    public static object ANDLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left && (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object ORLogic(object? left, object? right)
+    {
+        if (left is bool && right is bool)
+        {
+            return (bool)left || (bool)right;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
+
+    public static object NOTLogic(object? logic)
+    {
+        if (logic is bool b)
+        {
+            return !b;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
     }
 
     private object? isVariable(object? obj)
