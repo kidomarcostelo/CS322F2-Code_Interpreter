@@ -2,21 +2,21 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
+statement: (NEWLINE TAB (declaration | functionCall))* ((NEWLINE TAB declaration)+ (NEWLINE TAB (executable | functionCall))*)?;
 
-declaration:  NEWLINE TAB initialization;
+//statement: NEWLINE TAB functionCall;
+
+declaration: initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
+executable: IDENTIFIER (equalsOp expression);
 
-functionCall: NEWLINE TAB (display | scan);
-
-//functionCall: NEWLINE TAB (DISPLAY expression | scan);
+functionCall: (display | scan | ifBlock | whileBlock | forBlock);
  
-display: NEWLINE? DISPLAY expression NEWLINE?;
+display: DISPLAY expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
@@ -35,6 +35,34 @@ expression
     | newline                               #newlineExpression
     | ESCAPE                                #escapeExpression
     ;   
+
+boolExpression
+    : IDENTIFIER
+    | '(' expression ')'  
+    | expression compareOp expression
+    | expression logicOp expression
+    ;
+
+//conditionalExpression:  ifBlock;
+
+ifBlock: IF '('boolExpression')' conditionalBlock (elseIfBlock)?;
+
+elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock);
+
+conditionalBlock: 
+                NEWLINE TAB+ BEGIN_IF 
+                    (NEWLINE TAB+ (executable | functionCall))* 
+                NEWLINE TAB+ END_IF;
+
+whileBlock: WHILE (boolExpression)
+            NEWLINE TAB+ BEGIN_WHILE
+                (NEWLINE TAB+ (executable | functionCall))* 
+            NEWLINE TAB+ END_WHILE;
+
+forBlock: FOR ('(' assignment ',' boolExpression ',' executable ')')
+            NEWLINE TAB+ BEGIN_FOR
+                (NEWLINE TAB+ (executable | functionCall))* 
+            NEWLINE TAB+ END_FOR;
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -58,11 +86,17 @@ constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 identifier: IDENTIFIER;
 
 // control flow structures
-fragment IF: 'IF';
-fragment ELSE: 'ELSE';
+IF: 'IF';
+ELSE: 'ELSE';
+BEGIN_IF: BEGIN ' ' IF;
+END_IF: END ' ' IF;
+WHILE: 'WHILE';
+BEGIN_WHILE: BEGIN ' ' WHILE;
+END_WHILE: END ' ' WHILE;
+FOR: 'FOR';
+BEGIN_FOR: BEGIN ' ' FOR;
+END_FOR: END ' ' FOR;
 
-CONDITIONAL: IF | (ELSE ' ' IF) | ELSE;
-LOOP: 'WHILE';
 
 // tokens
 NEWLINE: ('\r\n');
@@ -71,9 +105,9 @@ COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
 WS: ' ' -> skip;
 ESCAPE: '[' .+? ']';
 
-fragment BEGIN: 'BEGIN';
-fragment END: 'END';
-fragment CODE: 'CODE';
+BEGIN: 'BEGIN';
+END: 'END';
+CODE: 'CODE';
 
 BEGIN_CODE: BEGIN ' ' CODE;
 END_CODE: END ' ' CODE;
@@ -91,11 +125,12 @@ SCAN: 'SCAN:';
 DISPLAY: 'DISPLAY:';
 
 // reserve words
-RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
-    LOOP | DISPLAY | SCAN | 'BEGIN IF';
+RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
+    WHILE | 'DISPLAY' | 'SCAN';
 
 EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
+
 

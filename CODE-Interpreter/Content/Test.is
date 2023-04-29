@@ -5,3 +5,16 @@ BEGIN CODE # xyz = ((abc *5)/10 + 10) * -1
 	INT ans = ((abc *5)/10 + 10) * -1
 END CODE # xyz = ((abc *5)/10 + 10) * -1
 # xyz = ((abc *5)/10 + 10) * -1
+
+
+
+BEGIN CODE
+	IF (a == 101)
+	BEGIN IF
+		DISPLAY: a
+		SCAN: a
+		xyz= ((abc *5)/10 + 10) * -1
+		xyz= ((abc *5)/10 + 10) * -1
+		xyz= ((abc *5)/10 + 10) * -1
+	END IF
+END CODE
