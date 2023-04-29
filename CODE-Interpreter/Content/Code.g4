@@ -45,16 +45,16 @@ boolExpression
 
 //conditionalExpression:  ifBlock;
 
-ifBlock: IF '('boolExpression')' conditionalBlock (elseIfBlock)?;
+ifBlock: IF '(' boolExpression ')' conditionalBlock (elseIfBlock)?;
 
-elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock);
+elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock); 
 
 conditionalBlock: 
                 NEWLINE TAB+ BEGIN_IF 
                     (NEWLINE TAB+ (executable | functionCall))* 
                 NEWLINE TAB+ END_IF;
 
-whileBlock: WHILE (boolExpression)
+whileBlock: WHILE '(' boolExpression ')'
             NEWLINE TAB+ BEGIN_WHILE
                 (NEWLINE TAB+ (executable | functionCall))* 
             NEWLINE TAB+ END_WHILE;
