@@ -476,8 +476,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-#antlr
-*.antlr/
-
 *test.cs
 *tempCodeRunnerFile.cs
+
+*.antlr

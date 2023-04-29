@@ -1,5 +1,7 @@
+# asdasdasd
 BEGIN CODE
-	INT xyz, abc=100
-	xyz= ((abc *5)/10 + 10) * -1
-	DISPLAY: [[] & xyz & []]
+	INT a=100, b=200, c=300 
+	BOOL d="FALSE"
+	d = NOT(a < b)
+	DISPLAY: d
 END CODE
