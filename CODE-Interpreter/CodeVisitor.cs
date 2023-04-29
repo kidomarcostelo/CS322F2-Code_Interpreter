@@ -699,6 +699,9 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         var right = Visit(context.expression(1));
         var logicop = context.logicOp().GetText();
 
+        left = isVariable(left);
+        right = isVariable(right);
+
         return logicop switch
         {
             "AND" => ANDLogic(left, right),
@@ -711,11 +714,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
+        var op = context.compareOp().GetText();
 
         left = isVariable(left);
-        right = isVariable(right);
-
-        var op = context.compareOp().GetText();
+        right = isVariable(right);    
 
         return op switch
         {
