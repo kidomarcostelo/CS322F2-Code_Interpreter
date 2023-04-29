@@ -12,19 +12,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        var args = context.expression().children.Select(Visit).ToList();
+        var exp = Visit(context.expression());
 
-        foreach (var arg in args)
-        {
-            var displayObj = isVariable(arg);
+        if (exp is bool b)
+            exp = b.ToString().ToUpper();
 
-            if (displayObj is bool b)
-                displayObj = b.ToString().ToUpper();
+        exp = isVariable(exp);
+        Console.Write(exp + " ");
 
-            Console.Write(displayObj);
-        }
-
-        return null;
+        return new object();
     }
 
 
@@ -52,7 +48,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
 
         // Ask user for input
-        Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
+        //Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
         string inputLine = Console.ReadLine();
         string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -201,15 +197,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
 
                     }
-
-                    value = value.ToString()!.ToUpper();
                 }
 
-               // if()
 
                 existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
                 _variables.Add(existingVar);
-                //Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
             }
         }
         return null!;
@@ -217,18 +209,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
-        //var varName = context.IDENTIFIER().GetText();
-
-        //var expressions = context.expression();
-
-        //foreach (var expression in expressions)
-        //{
-        //    object value = Visit(expression);
-
-        //    _variables.Add(v => v.Value = value, v.Identifier = .....);
-        //}
-
-        //return null!;
         var variableName = context.IDENTIFIER().GetText();
         var expressions = context.expression();
 
@@ -375,8 +355,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
-        object left = Visit(context.expression(0));
-        object right = Visit(context.expression(1));
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
         
@@ -418,24 +398,17 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         left = isVariable(left);
         right = isVariable(right);
 
+        if (left is bool lb)
+            left = lb.ToString().ToUpper();
+
+        if (right is bool rb)
+            right = rb.ToString().ToUpper();
+
         return $"{left}{right}";
     }
 
     public override object? VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
     {
-        //var left = Visit(context.expression(0));
-        //var right = Visit(context.expression(1));
-
-        //var op = context.multOp().GetText();
-
-        //return op switch
-        //{
-        //    "*" => Multiply(left, right),
-        //    "/" => Divide(left, right),
-        //    "%" => Modulo(left, right),
-        //    _ => throw new NotImplementedException()
-        //};
-
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
         
