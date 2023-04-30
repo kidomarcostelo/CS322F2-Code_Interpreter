@@ -20,7 +20,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             exp = b.ToString().ToUpper();
 
         exp = isVariable(exp);
-        Console.Write(exp + " ");
+        Console.Write(exp);
 
         return new object();
     }
@@ -225,7 +225,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             object value = Visit(expression)!;
             _variables[index].Value = value;
-            Console.Write(_variables[index].Value);
+            //Console.Write(_variables[index].Value);
         }
         return null;
     }
@@ -734,6 +734,29 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     public override object VisitBoolParethesizedExpression([NotNull] CodeParser.BoolParethesizedExpressionContext context)
     {
         return Visit(context.expression())!;
+    }
+
+    public override object VisitSwitchBlock([NotNull] SwitchBlockContext context)
+    {
+        var expression = Visit(context.expression());
+
+        return expression!;
+    }
+
+    public override object VisitForBlock([NotNull] ForBlockContext context)
+    {
+        try
+        {
+            for (Visit(context.assignment()); (bool)Visit(context.boolExpression())!; Visit(context.executable()))
+            {
+                Visit(context.forBody());
+            }
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        return null!;
     }
 
     private object? isVariable(object? obj)

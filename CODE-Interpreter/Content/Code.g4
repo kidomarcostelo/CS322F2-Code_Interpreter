@@ -14,7 +14,7 @@ assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+;
 
 executable: IDENTIFIER (equalsOp expression);
 
-functionCall: (display | scan | ifBlock | whileBlock | forBlock);
+functionCall: (display | scan | ifBlock | whileBlock | forBlock | switchBlock);
  
 display: DISPLAY expression NEWLINE?;
 
@@ -43,8 +43,7 @@ boolExpression
     | expression logicOp expression         #boolLogicalExpression
     ;
 
-//conditionalExpression:  ifBlock;
-
+//conditionalStructures
 ifBlock: IF '(' boolExpression ')' conditionalBlock (elseIfBlock)?;
 
 elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock); 
@@ -59,10 +58,27 @@ whileBlock: WHILE '(' boolExpression ')'
                 (NEWLINE TAB+ (executable | functionCall))* 
             NEWLINE TAB+ END_WHILE;
 
-forBlock: FOR ('(' assignment ',' boolExpression ',' executable ')')
+forBlock: FOR ('(' assignment ';' boolExpression ';' executable ')')
             NEWLINE TAB+ BEGIN_FOR
-                (NEWLINE TAB+ (executable | functionCall))* 
+                forBody 
             NEWLINE TAB+ END_FOR;
+
+forBody: (NEWLINE TAB+ (executable | functionCall))* ;
+
+switchBlock: SWITCH '(' expression ')' 
+                NEWLINE TAB+ BEGIN_SWITCH
+                    caseBlock
+                NEWLINE TAB+ END_SWITCH;
+
+
+caseBlock: NEWLINE TAB+ CASE constant ':'
+                (NEWLINE TAB+ (executable | functionCall))* 
+                (NEWLINE TAB+ BREAK)?
+            (caseBlock | defaultBlock)?;
+    
+defaultBlock: NEWLINE TAB+ DEFAULT ':'
+                (NEWLINE TAB+ (executable | functionCall))* 
+                (NEWLINE TAB+ BREAK)?;
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -97,13 +113,20 @@ FOR: 'FOR';
 BEGIN_FOR: BEGIN ' ' FOR;
 END_FOR: END ' ' FOR;
 
+SWITCH: 'SWITCH';
+BEGIN_SWITCH: 'BEGIN SWITCH';
+END_SWITCH: 'END SWITCH';
+CASE: 'CASE';
+DEFAULT: 'DEFAULT';
+BREAK: 'BREAK';
 
 // tokens
-NEWLINE: ('\r\n');
+NEWLINE: ('\r\n') ;
 TAB: '\t';
 COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
 WS: ' ' -> skip;
 ESCAPE: '[' .+? ']';
+
 
 BEGIN: 'BEGIN';
 END: 'END';
@@ -126,11 +149,10 @@ DISPLAY: 'DISPLAY:';
 
 // reserve words
 RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
-    WHILE | 'DISPLAY' | 'SCAN';
+    WHILE | 'DISPLAY' | 'SCAN' | SWITCH | CASE | DEFAULT | BREAK;
 
 EQUALS: '=';
 COMMA: ',';
 
 IDENTIFIER: [a-zA-Z_][a-zA-Z_0-9]*;
-
 
