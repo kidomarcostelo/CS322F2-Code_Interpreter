@@ -638,6 +638,31 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
+    public override object VisitWhileBlock([NotNull] WhileBlockContext context)
+    {
+        try
+        {
+            bool temp = (bool)Visit(context.boolExpression())!;
+
+            while (temp)
+            {
+                Visit(context.whileBody());
+                temp = (bool)Visit(context.boolExpression())!;
+            }
+
+            if (!temp)
+            {
+                Console.WriteLine($"The bool expression is {temp}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+
+        return null!;
+    }
+
     public override object VisitIfBlock([NotNull] CodeParser.IfBlockContext context)
     {
         // evaluate the boolean expression in the if statement

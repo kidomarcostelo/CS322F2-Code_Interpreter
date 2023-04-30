@@ -1,28 +1,15 @@
 # asdasdasd
 BEGIN CODE
-	BOOL t = "TRUE"
-	BOOL f = "FALSE"
-	INT x = 5;
-	IF (f)
-	BEGIN IF
-		DISPLAY: "IF"
-	END IF
-	ELSE IF (t)
-	BEGIN IF
-		IF (f)
-		BEGIN IF
-			DISPLAY: "NESTED ELSE IF TRUE"
-			x = 100;
-		END IF
-		ELSE IF (t OR f)
-		BEGIN IF
-			DISPLAY: "NESTED ELSE IF FALSE"
-			x = 105 * 2 / 5;
-		END IF
-	END IF
-	ELSE
-	BEGIN IF
-		DISPLAY: "ELSE"
-	END IF
-	DISPLAY: x
+	INT i = 1, j = 1
+	WHILE (i <= 3)
+	BEGIN WHILE
+		DISPLAY: "OUTER LOOP: " & i & $ 
+		WHILE (j > 2)
+		BEGIN WHILE
+			DISPLAY: "INNER LOOP: " & j & $
+			j = j + 1
+		END WHILE
+		i = i + 1
+		j = 1
+	END WHILE
 END CODE
