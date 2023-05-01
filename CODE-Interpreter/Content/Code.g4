@@ -54,7 +54,9 @@ conditionalBlock:
                 NEWLINE TAB+ END_IF;
 
 whileBlock: WHILE '(' boolExpression ')'
-            NEWLINE TAB+ BEGIN_WHILE
+            whileBody;
+
+whileBody: NEWLINE TAB+ BEGIN_WHILE
                 (NEWLINE TAB+ (executable | functionCall))* 
             NEWLINE TAB+ END_WHILE;
 
