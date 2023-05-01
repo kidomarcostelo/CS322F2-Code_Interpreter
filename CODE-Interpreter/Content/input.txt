@@ -1,6 +1,6 @@
 # asdasdasd
 BEGIN CODE
 	INT i = 10
-	i = -1.3+i
+	i = +1.3-i
 	DISPLAY: i
 END CODE
