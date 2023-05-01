@@ -1,15 +1,9 @@
 # asdasdasd
 BEGIN CODE
-	INT i = 1, j = 1
-	WHILE (i <= 3)
-	BEGIN WHILE
-		DISPLAY: "OUTER LOOP: " & i & $ 
-		WHILE (j > 2)
-		BEGIN WHILE
-			DISPLAY: "INNER LOOP: " & j & $
-			j = j + 1
-		END WHILE
-		i = i + 1
-		j = 1
-	END WHILE
+	INT i = 1
+	FLOAT j = 1.1
+	IF (5.5 >= 5)
+	BEGIN IF
+		DISPLAY: i % j
+	END IF
 END CODE
