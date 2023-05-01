@@ -1,7 +1,5 @@
-using Antlr4;
 using Antlr4.Runtime;
 using CODE_Interpreter.Content;
-using static System.Net.Mime.MediaTypeNames;
 using CommonTokenStream = Antlr4.Runtime.CommonTokenStream;
 
 
@@ -21,7 +19,6 @@ try
     var codeContext = codeParser.program();
     var visitor = new CodeVisitor();
     visitor.Visit(codeContext);
-    //Console.WriteLine("In Console");
 
 }catch(Exception e)
 {

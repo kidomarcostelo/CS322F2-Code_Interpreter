@@ -2,12 +2,7 @@ using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Linq.Expressions;
-using static Antlr4.Runtime.Atn.SemanticContext;
 using static CODE_Interpreter.Content.CodeParser;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
@@ -24,7 +19,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return new object();
     }
-
 
     public override object? VisitScan([NotNull] CodeParser.ScanContext context)
     {
@@ -51,7 +45,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         // Ask user for input
         //Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
-        string inputLine = Console.ReadLine();
+        string inputLine = Console.ReadLine()!;
         string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         // Loop through each input value and validate it based on the variable's data type,
@@ -121,7 +115,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null!;
     }
 
-    // recognize variable
     public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
     {
         if (context.initialization != null)
@@ -225,7 +218,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             object value = Visit(expression)!;
             _variables[index].Value = value;
-            //Console.Write(_variables[index].Value);
         }
         return null;
     }
@@ -294,6 +286,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return value;
     }
+
     public override object? VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         if (context.constant().INTEGERVAL() is { } i)
@@ -313,6 +306,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
+
     public override object? VisitEqualsExpression([NotNull] CodeParser.EqualsExpressionContext context)
     {
         var variableName = context.IDENTIFIER().GetText();
@@ -328,6 +322,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         return value;
     }
+
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
         if (context.INTEGERVAL() is { } i)
@@ -344,6 +339,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
+
     public override object? VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
     {
         return Visit(context.expression())!;
@@ -463,10 +459,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitIfBlock([NotNull] CodeParser.IfBlockContext context)
     {
-        // evaluate the boolean expression in the if statement
         bool temp = (bool)Visit(context.boolExpression())!;
 
-        // if the condition is true, execute the statements in the if block
         if (temp)
         {
             Visit(context.conditionalBlock());
