@@ -27,6 +27,7 @@ expression
     | 'NOT' expression                      #notExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
+    | unary expression                      #unaryExpression
     | expression multOp expression          #multiplicativeExpression
     | expression addOp expression           #additiveExpression
     | expression concat expression		    #concatExpression
@@ -93,7 +94,8 @@ compareOp
     | '<='  // lesser than or equal to
     | '<>'  // not equal
     ;
-    
+
+unary: '+' | '-' ;    
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR';
 concat: '&';
@@ -140,8 +142,8 @@ DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 
 // value equivalents
 BOOLVAL: '"' ('TRUE' | 'FALSE') '"';
-INTEGERVAL: '-'?[0-9]+;
-FLOATVAL: '-'?[0-9]+'.'[0-9]+;
+INTEGERVAL: [0-9]+;
+FLOATVAL: [0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
 STRINGVAL: '"' (.*?) '"'; 
 

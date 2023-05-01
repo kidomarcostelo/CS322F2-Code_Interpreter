@@ -432,6 +432,25 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return "\n";
     }
 
+    public override object? VisitUnaryExpression([NotNull] UnaryExpressionContext context)
+    {
+        var symbol = context.unary().GetText();
+        var value = Visit(context.expression());
+
+        if (symbol == "+")
+            return value;
+
+        if (symbol == "-")
+        {
+            if (value is int i)
+                return -i;
+            if (value is float f)
+                return -f;
+        }
+
+        return null;
+    }
+
     public override object? VisitWhileBlock([NotNull] WhileBlockContext context)
     {
         try
@@ -581,7 +600,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (obj is Variable var)
         {
             if (!(_variables.Any(p => p.Identifier == var.Identifier)))
-                throw new Exception($"Undefined varible {var}");
+                throw new Exception($"Undefined variable {var}");
             obj = var.Value;
         }
         return obj;
