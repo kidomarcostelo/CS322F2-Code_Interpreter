@@ -1,9 +1,6 @@
 # asdasdasd
 BEGIN CODE
-	INT i = 1
-	FLOAT j = 1.1
-	IF (5.5 >= 5)
-	BEGIN IF
-		DISPLAY: i % j
-	END IF
+	INT i = 10
+	i = +1.3-i
+	DISPLAY: i
 END CODE
