@@ -459,20 +459,17 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
             while (temp)
             {
-                Visit(context.whileBody());
+                foreach (var lineContext in context.whileBody().children)
+                {
+                    Visit(lineContext);
+                }
                 temp = (bool)Visit(context.boolExpression())!;
-            }
-
-            if (!temp)
-            {
-                Console.WriteLine($"The bool expression is {temp}");
             }
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
-
         return null!;
     }
 
