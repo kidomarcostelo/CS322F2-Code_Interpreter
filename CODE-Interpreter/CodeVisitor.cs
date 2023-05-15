@@ -272,19 +272,39 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitExecutable([NotNull] CodeParser.ExecutableContext context)
     {
-        var identifier = context.IDENTIFIER().GetText();
+        //var identifier = context.IDENTIFIER().GetText();
 
-        var variable = _variables.Find(p => p.Identifier == identifier);
+        //var variable = _variables.Find(p => p.Identifier == identifier);
 
+        //if (variable == null)
+        //{
+        //    throw new Exception($"Variable {identifier} is undefined");
+        //}
+
+        //var value = Visit(context.expression());
+        //variable.Value = value;
+
+        //return value;
+
+        var variableName = context.IDENTIFIER().GetText();
+        var expressionValue = Visit(context.expression());
+
+        // Find the variable in the list
+        var variable = _variables.Find(v => v.Identifier == variableName);
         if (variable == null)
         {
-            throw new Exception($"Variable {identifier} is undefined");
+            throw new Exception($"Variable '{variableName}' not found.");
         }
 
-        var value = Visit(context.expression());
-        variable.Value = value;
+        // Extract the final value from the expression, if it is a Variable object
+        if (expressionValue is Variable expressionVariable)
+        {
+            expressionValue = expressionVariable.Value;
+        }
 
-        return value;
+        variable.Value = expressionValue; // Assign the value to the variable
+
+        return expressionValue;
     }
 
     public override object? VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
@@ -409,12 +429,21 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
+        var op = context.compareOp().GetText();
 
         left = isVariable(left);
         right = isVariable(right);
-        
-        var op = context.compareOp().GetText();
-        
+
+        if (left is Variable leftVar)
+        {
+            left = leftVar.Value;
+        }
+
+        if (right is Variable rightVar)
+        {
+            right = rightVar.Value;
+        }
+
         return op switch
         {
             "<" => LesserThan(left, right),
@@ -596,9 +625,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         if (obj is Variable var)
         {
-            if (!(_variables.Any(p => p.Identifier == var.Identifier)))
+            if (_variables.Any(p => p.Identifier == var.Identifier))
+            {
+                var variable = _variables.Find(p => p.Identifier == var.Identifier)!;
+                return variable.Value;
+            }
+            else
+            {
                 throw new Exception($"Undefined variable {var}");
-            obj = var.Value;
+            }
         }
         return obj;
     }
