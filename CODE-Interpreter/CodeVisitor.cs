@@ -338,8 +338,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             throw new Exception($"Variable {variableName} is undefined");
         }
         var value = Visit(context.expression())!;
-        existingVar.Value = value;
+        if (value is Variable vars)
+        {
+            existingVar.Value = vars.Value;
+            return existingVar;
+        }
 
+        existingVar.Value = value;
         return value;
     }
 
