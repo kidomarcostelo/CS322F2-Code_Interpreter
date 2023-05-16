@@ -20,7 +20,8 @@ try
     var visitor = new CodeVisitor();
     visitor.Visit(codeContext);
 
-}catch(Exception e)
+}
+catch (Exception e)
 {
     Console.WriteLine(e);
 }

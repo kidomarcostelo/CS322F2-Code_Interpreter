@@ -10,11 +10,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
         var exp = Visit(context.expression());
+        exp = isVariable(exp);
 
         if (exp is bool b)
             exp = b.ToString().ToUpper();
 
-        exp = isVariable(exp);
+
         Console.Write(exp);
 
         return new object();
@@ -382,10 +383,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         var right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
-        
+
         left = isVariable(left);
         right = isVariable(right);
-        
+
         return op switch
         {
             "+" => Add(left, right),
@@ -398,12 +399,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-        
+
         var op = context.multOp().GetText();
-        
+
         left = isVariable(left);
         right = isVariable(right);
-        
+
         return op switch
         {
             "*" => Multiply(left, right),
@@ -516,7 +517,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             Visit(context.conditionalBlock());
         }
 
-        else if(context.elseIfBlock() is CodeParser.ElseIfBlockContext)
+        else if (context.elseIfBlock() is CodeParser.ElseIfBlockContext)
         {
             Visit(context.elseIfBlock());
         }
@@ -584,7 +585,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         var op = context.compareOp().GetText();
 
         left = isVariable(left);
-        right = isVariable(right);    
+        right = isVariable(right);
 
         return op switch
         {
@@ -619,7 +620,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                 Visit(context.forBody());
             }
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
