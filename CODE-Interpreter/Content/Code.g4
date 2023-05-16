@@ -2,21 +2,21 @@ grammar Code;
 
 program: NEWLINE? BEGIN_CODE statement NEWLINE END_CODE EOF;
 
-statement: (declaration | functionCall)* (declaration+ (executable | functionCall)*)?;
+statement: (NEWLINE TAB (declaration | functionCall))* ((NEWLINE TAB declaration)+ (NEWLINE TAB (executable | functionCall))*)?;
 
-declaration:  NEWLINE TAB initialization;
+//statement: NEWLINE TAB functionCall;
+
+declaration: initialization;
 
 initialization: DATA_TYPE (COMMA? assignment)+;
 
 assignment: IDENTIFIER | IDENTIFIER (equalsOp expression)+; 
 
-executable: NEWLINE TAB IDENTIFIER (equalsOp expression);
+executable: IDENTIFIER (equalsOp expression);
 
-functionCall: NEWLINE TAB (display | scan);
-
-//functionCall: NEWLINE TAB (DISPLAY expression | scan);
+functionCall: (display | scan | ifBlock | whileBlock | forBlock | switchBlock);
  
-display: NEWLINE? DISPLAY expression NEWLINE?;
+display: DISPLAY expression NEWLINE?;
 
 scan: SCAN IDENTIFIER (',' IDENTIFIER)*;
 
@@ -24,9 +24,10 @@ expression
     : constant                              #constantExpression
     | identifier                            #identifierExpression
     | IDENTIFIER equalsOp expression        #equalsExpression
-    | 'NOT' expression                        #notExpression
+    | 'NOT' expression                      #notExpression
     | functionCall						    #functionCallExpression
     | '(' expression ')'                    #parethesizedExpression
+    | unary expression                      #unaryExpression
     | expression multOp expression          #multiplicativeExpression
     | expression addOp expression           #additiveExpression
     | expression concat expression		    #concatExpression
@@ -35,6 +36,52 @@ expression
     | newline                               #newlineExpression
     | ESCAPE                                #escapeExpression
     ;   
+
+boolExpression
+    : IDENTIFIER                            #boolIdentifierExpression
+    | '(' expression ')'                    #boolParethesizedExpression
+    | expression compareOp expression       #boolComparativeExpression
+    | expression logicOp expression         #boolLogicalExpression
+    ;
+
+//conditionalStructures
+ifBlock: IF '(' boolExpression ')' conditionalBlock (elseIfBlock)?;
+
+elseIfBlock: NEWLINE TAB+ ELSE (conditionalBlock | ifBlock); 
+
+conditionalBlock: 
+                NEWLINE TAB+ BEGIN_IF 
+                    (NEWLINE TAB+ (executable | functionCall))* 
+                NEWLINE TAB+ END_IF;
+
+whileBlock: WHILE '(' boolExpression ')'
+            whileBody;
+
+whileBody: NEWLINE TAB+ BEGIN_WHILE
+                (NEWLINE TAB+ (executable | functionCall))* 
+            NEWLINE TAB+ END_WHILE;
+
+forBlock: FOR ('(' assignment ';' boolExpression ';' executable ')')
+            NEWLINE TAB+ BEGIN_FOR
+                forBody 
+            NEWLINE TAB+ END_FOR;
+
+forBody: (NEWLINE TAB+ (executable | functionCall))* ;
+
+switchBlock: SWITCH '(' expression ')' 
+                NEWLINE TAB+ BEGIN_SWITCH
+                    caseBlock
+                NEWLINE TAB+ END_SWITCH;
+
+
+caseBlock: NEWLINE TAB+ CASE constant ':'
+                (NEWLINE TAB+ (executable | functionCall))* 
+                (NEWLINE TAB+ BREAK)?
+            (caseBlock | defaultBlock)?;
+    
+defaultBlock: NEWLINE TAB+ DEFAULT ':'
+                (NEWLINE TAB+ (executable | functionCall))* 
+                (NEWLINE TAB+ BREAK)?;
 
 // operations
 multOp: '*' | '/' | '%'; 
@@ -47,7 +94,8 @@ compareOp
     | '<='  // lesser than or equal to
     | '<>'  // not equal
     ;
-    
+
+unary: '+' | '-' ;    
 equalsOp: EQUALS; 
 logicOp: 'AND' | 'OR';
 concat: '&';
@@ -58,22 +106,35 @@ constant: BOOLVAL | INTEGERVAL | FLOATVAL | CHARVAL | STRINGVAL;
 identifier: IDENTIFIER;
 
 // control flow structures
-fragment IF: 'IF';
-fragment ELSE: 'ELSE';
+IF: 'IF';
+ELSE: 'ELSE';
+BEGIN_IF: BEGIN ' ' IF;
+END_IF: END ' ' IF;
+WHILE: 'WHILE';
+BEGIN_WHILE: BEGIN ' ' WHILE;
+END_WHILE: END ' ' WHILE;
+FOR: 'FOR';
+BEGIN_FOR: BEGIN ' ' FOR;
+END_FOR: END ' ' FOR;
 
-CONDITIONAL: IF | (ELSE ' ' IF) | ELSE;
-LOOP: 'WHILE';
+SWITCH: 'SWITCH';
+BEGIN_SWITCH: 'BEGIN SWITCH';
+END_SWITCH: 'END SWITCH';
+CASE: 'CASE';
+DEFAULT: 'DEFAULT';
+BREAK: 'BREAK';
 
 // tokens
-NEWLINE: ('\r\n');
+NEWLINE: ('\r\n') ;
 TAB: '\t';
 COMMENT: NEWLINE? TAB? '#' ~[\r\n]* -> skip;
 WS: ' ' -> skip;
 ESCAPE: '[' .+? ']';
 
-fragment BEGIN: 'BEGIN';
-fragment END: 'END';
-fragment CODE: 'CODE';
+
+BEGIN: 'BEGIN';
+END: 'END';
+CODE: 'CODE';
 
 BEGIN_CODE: BEGIN ' ' CODE;
 END_CODE: END ' ' CODE;
@@ -81,8 +142,8 @@ DATA_TYPE: 'INT' | 'CHAR' | 'BOOL' | 'FLOAT';
 
 // value equivalents
 BOOLVAL: '"' ('TRUE' | 'FALSE') '"';
-INTEGERVAL: '-'?[0-9]+;
-FLOATVAL: '-'?[0-9]+'.'[0-9]+;
+INTEGERVAL: [0-9]+;
+FLOATVAL: [0-9]+'.'[0-9]+;
 CHARVAL: '\''[a-zA-Z] '\''; 
 STRINGVAL: '"' (.*?) '"'; 
 
@@ -91,8 +152,8 @@ SCAN: 'SCAN:';
 DISPLAY: 'DISPLAY:';
 
 // reserve words
-RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | CONDITIONAL
-    LOOP | DISPLAY | SCAN | 'BEGIN IF';
+RESERVE_WORD: DATA_TYPE | BEGIN | END | CODE | BOOLVAL | IF | ELSE
+    WHILE | 'DISPLAY' | 'SCAN' | SWITCH | CASE | DEFAULT | BREAK;
 
 EQUALS: '=';
 COMMA: ',';

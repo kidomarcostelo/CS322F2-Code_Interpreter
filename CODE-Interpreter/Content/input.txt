@@ -1,7 +1,17 @@
-# asdasdasd
 BEGIN CODE
-	INT a=100, b=200, c=300 
-	BOOL d="FALSE"
-	d = NOT(a < b)
-	DISPLAY: d
+	INT a=100, b=200, c=300, x, y
+	BOOL d="TRUE"
+	SCAN: y
+	x = y
+	WHILE (x < 5)
+		BEGIN WHILE
+		y = 1
+		WHILE (y <= 5)
+		BEGIN WHILE
+			DISPLAY: x & " * " & y & " = " & x*y & $
+			y = y + 1
+		END WHILE
+		x = x + 1
+		DISPLAY: $
+	END WHILE
 END CODE

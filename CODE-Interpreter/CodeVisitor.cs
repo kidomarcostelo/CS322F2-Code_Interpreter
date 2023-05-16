@@ -2,31 +2,24 @@ using Antlr4.Runtime.Misc;
 using Antlr4.Runtime.Tree;
 using CODE_Interpreter;
 using CODE_Interpreter.Content;
-using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
-using static Antlr4.Runtime.Atn.SemanticContext;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static CODE_Interpreter.Content.CodeParser;
 public class CodeVisitor : CodeBaseVisitor<object?>
 {
     private List<Variable> _variables = new List<Variable>();
 
     public override object? VisitDisplay([NotNull] CodeParser.DisplayContext context)
     {
-        var args = context.expression().children.Select(Visit).ToList();
+        var exp = Visit(context.expression());
+        exp = isVariable(exp);
 
-        foreach (var arg in args)
-        {
-            var displayObj = isVariable(arg);
+        if (exp is bool b)
+            exp = b.ToString().ToUpper();
 
-            if (displayObj is bool b)
-                displayObj = b.ToString().ToUpper();
 
-            Console.Write(displayObj);
-        }
+        Console.Write(exp);
 
-        return null;
+        return new object();
     }
-
 
     public override object? VisitScan([NotNull] CodeParser.ScanContext context)
     {
@@ -52,8 +45,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
 
         // Ask user for input
-        Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
-        string inputLine = Console.ReadLine();
+        //Console.WriteLine($"Enter value for {string.Join(", ", varNames)}: ");
+        string inputLine = Console.ReadLine()!;
         string[] inputValues = inputLine.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
         // Loop through each input value and validate it based on the variable's data type,
@@ -123,8 +116,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         return null!;
     }
 
-    // recognize variable
-    public override object VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
+    public override object? VisitDeclaration([NotNull] CodeParser.DeclarationContext context)
     {
         if (context.initialization != null)
         {
@@ -201,15 +193,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
                         throw new Exception($"Error: Value '{value}' cannot be assigned to a BOOL variable.");
 
                     }
-
-                    value = value.ToString()!.ToUpper();
                 }
 
-               // if()
 
                 existingVar = new Variable { DataType = dataType, Identifier = identifier, Value = value };
                 _variables.Add(existingVar);
-                //Console.WriteLine(_variables[0].DataType + "\n" + _variables[0].Identifier + "\n" + _variables[0].Value);
             }
         }
         return null!;
@@ -217,18 +205,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitAssignment([NotNull] CodeParser.AssignmentContext context)
     {
-        //var varName = context.IDENTIFIER().GetText();
-
-        //var expressions = context.expression();
-
-        //foreach (var expression in expressions)
-        //{
-        //    object value = Visit(expression);
-
-        //    _variables.Add(v => v.Value = value, v.Identifier = .....);
-        //}
-
-        //return null!;
         var variableName = context.IDENTIFIER().GetText();
         var expressions = context.expression();
 
@@ -243,12 +219,11 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             object value = Visit(expression)!;
             _variables[index].Value = value;
-            Console.Write(_variables[index].Value);
         }
         return null;
     }
 
-    public override object VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
+    public override object? VisitLogicalExpression([NotNull] CodeParser.LogicalExpressionContext context)
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
@@ -262,13 +237,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         };
     }
 
-    public override object VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
+    public override object? VisitNotExpression([NotNull] CodeParser.NotExpressionContext context)
     {
         var expression = Visit(context.expression());
         return NOTLogic(expression);
     }
 
-    public override object VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
+    public override object? VisitIdentifierExpression(CodeParser.IdentifierExpressionContext context)
     {
         string identifier = context.identifier().GetText();
 
@@ -282,7 +257,7 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
-    public override object VisitIdentifier([NotNull] CodeParser.IdentifierContext context)
+    public override object? VisitIdentifier([NotNull] CodeParser.IdentifierContext context)
     {
         string identifier = context.IDENTIFIER().GetText();
 
@@ -296,23 +271,44 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
     }
 
-    public override object VisitExecutable([NotNull] CodeParser.ExecutableContext context)
+    public override object? VisitExecutable([NotNull] CodeParser.ExecutableContext context)
     {
-        var identifier = context.IDENTIFIER().GetText();
+        //var identifier = context.IDENTIFIER().GetText();
 
-        var variable = _variables.Find(p => p.Identifier == identifier);
+        //var variable = _variables.Find(p => p.Identifier == identifier);
 
+        //if (variable == null)
+        //{
+        //    throw new Exception($"Variable {identifier} is undefined");
+        //}
+
+        //var value = Visit(context.expression());
+        //variable.Value = value;
+
+        //return value;
+
+        var variableName = context.IDENTIFIER().GetText();
+        var expressionValue = Visit(context.expression());
+
+        // Find the variable in the list
+        var variable = _variables.Find(v => v.Identifier == variableName);
         if (variable == null)
         {
-            throw new Exception($"Variable {identifier} is undefined");
+            throw new Exception($"Variable '{variableName}' not found.");
         }
 
-        var value = Visit(context.expression());
-        variable.Value = value;
+        // Extract the final value from the expression, if it is a Variable object
+        if (expressionValue is Variable expressionVariable)
+        {
+            expressionValue = expressionVariable.Value;
+        }
 
-        return value;
+        variable.Value = expressionValue; // Assign the value to the variable
+
+        return expressionValue;
     }
-    public override object VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
+
+    public override object? VisitConstantExpression([NotNull] CodeParser.ConstantExpressionContext context)
     {
         if (context.constant().INTEGERVAL() is { } i)
             return int.Parse(i.GetText());
@@ -331,7 +327,8 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
-    public override object VisitEqualsExpression([NotNull] CodeParser.EqualsExpressionContext context)
+
+    public override object? VisitEqualsExpression([NotNull] CodeParser.EqualsExpressionContext context)
     {
         var variableName = context.IDENTIFIER().GetText();
 
@@ -342,10 +339,16 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             throw new Exception($"Variable {variableName} is undefined");
         }
         var value = Visit(context.expression())!;
-        existingVar.Value = value;
+        if (value is Variable vars)
+        {
+            existingVar.Value = vars.Value;
+            return existingVar;
+        }
 
+        existingVar.Value = value;
         return value;
     }
+
     public override object? VisitConstant(CodeParser.ConstantContext context)
     {
         if (context.INTEGERVAL() is { } i)
@@ -362,9 +365,10 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         throw new NotImplementedException();
     }
-    public override object VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
+
+    public override object? VisitParethesizedExpression([NotNull] CodeParser.ParethesizedExpressionContext context)
     {
-        return Visit(context.expression());
+        return Visit(context.expression())!;
     }
 
     public override object? VisitEscapeExpression([NotNull] CodeParser.EscapeExpressionContext context)
@@ -375,14 +379,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public override object? VisitAdditiveExpression(CodeParser.AdditiveExpressionContext context)
     {
-        object left = Visit(context.expression(0));
-        object right = Visit(context.expression(1));
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
 
         var op = context.addOp().GetText();
-        
+
         left = isVariable(left);
         right = isVariable(right);
-        
+
         return op switch
         {
             "+" => Add(left, right),
@@ -395,12 +399,12 @@ public class CodeVisitor : CodeBaseVisitor<object?>
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-        
+
         var op = context.multOp().GetText();
-        
+
         left = isVariable(left);
         right = isVariable(right);
-        
+
         return op switch
         {
             "*" => Multiply(left, right),
@@ -410,41 +414,43 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         };
     }
 
-    public override object VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
+    public override object? VisitConcatExpression([NotNull] CodeParser.ConcatExpressionContext context)
     {
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
 
         left = isVariable(left);
         right = isVariable(right);
+
+        if (left is bool lb)
+            left = lb.ToString().ToUpper();
+
+        if (right is bool rb)
+            right = rb.ToString().ToUpper();
 
         return $"{left}{right}";
     }
 
     public override object? VisitComparativeExpression([NotNull] CodeParser.ComparativeExpressionContext context)
     {
-        //var left = Visit(context.expression(0));
-        //var right = Visit(context.expression(1));
-
-        //var op = context.multOp().GetText();
-
-        //return op switch
-        //{
-        //    "*" => Multiply(left, right),
-        //    "/" => Divide(left, right),
-        //    "%" => Modulo(left, right),
-        //    _ => throw new NotImplementedException()
-        //};
-
         var left = Visit(context.expression(0));
         var right = Visit(context.expression(1));
-        
+        var op = context.compareOp().GetText();
+
         left = isVariable(left);
         right = isVariable(right);
-        
-        var temp = context.compareOp().GetText();
-        
-        return temp switch
+
+        if (left is Variable leftVar)
+        {
+            left = leftVar.Value;
+        }
+
+        if (right is Variable rightVar)
+        {
+            right = rightVar.Value;
+        }
+
+        return op switch
         {
             "<" => LesserThan(left, right),
             ">" => GreaterThan(left, right),
@@ -454,71 +460,247 @@ public class CodeVisitor : CodeBaseVisitor<object?>
             "<>" => NotEqual(left, right),
             _ => throw new NotImplementedException()
         };
-
     }
 
-    public override object VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
+    public override object? VisitNewlineExpression([NotNull] CodeParser.NewlineExpressionContext context)
     {
         return "\n";
     }
 
-    private object? Add (object? left, object? right)
+    public override object? VisitUnaryExpression([NotNull] UnaryExpressionContext context)
+    {
+        var symbol = context.unary().GetText();
+        var value = Visit(context.expression());
+
+        if (symbol == "+")
+            return value;
+
+        if (symbol == "-")
+        {
+            if (value is int i)
+                return -i;
+            if (value is float f)
+                return -f;
+        }
+
+        return null;
+    }
+
+    public override object? VisitWhileBlock([NotNull] WhileBlockContext context)
+    {
+        try
+        {
+            bool temp = (bool)Visit(context.boolExpression())!;
+
+            while (temp)
+            {
+                foreach (var lineContext in context.whileBody().children)
+                {
+                    Visit(lineContext);
+                }
+                temp = (bool)Visit(context.boolExpression())!;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        return null!;
+    }
+
+    public override object? VisitIfBlock([NotNull] CodeParser.IfBlockContext context)
+    {
+        bool temp = (bool)Visit(context.boolExpression())!;
+
+        if (temp)
+        {
+            Visit(context.conditionalBlock());
+        }
+
+        else if (context.elseIfBlock() is CodeParser.ElseIfBlockContext)
+        {
+            Visit(context.elseIfBlock());
+        }
+
+        return null!;
+    }
+
+    public override object? VisitElseIfBlock([NotNull] CodeParser.ElseIfBlockContext context)
+    {
+        if (context.conditionalBlock() is CodeParser.ConditionalBlockContext)
+        {
+            Visit(context.conditionalBlock());
+        }
+        else if (context.ifBlock() is CodeParser.IfBlockContext)
+        {
+            Visit(context.ifBlock());
+        }
+
+        return null!;
+    }
+
+    public override object? VisitBoolIdentifierExpression([NotNull] CodeParser.BoolIdentifierExpressionContext context)
+    {
+        string identifier = context.IDENTIFIER().GetText();
+
+        if (_variables.Any(p => p.Identifier == identifier))
+        {
+            var temp = _variables.Find(p => p.Identifier == identifier);
+            if (temp?.DataType == "BOOL")
+            {
+                return temp.Value!;
+            }
+            else
+            {
+                throw new Exception(string.Format("Defined variable is not of type bool"));
+            }
+        }
+        else
+        {
+            throw new Exception(string.Format("Undefined variable '{0}'", identifier));
+        }
+    }
+
+    public override object? VisitBoolLogicalExpression([NotNull] CodeParser.BoolLogicalExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var logicop = context.logicOp().GetText();
+
+        left = isVariable(left);
+        right = isVariable(right);
+
+        return logicop switch
+        {
+            "AND" => ANDLogic(left, right),
+            "OR" => ORLogic(left, right),
+            _ => throw new InvalidOperationException("Unknown operator")
+        };
+    }
+
+    public override object? VisitBoolComparativeExpression([NotNull] CodeParser.BoolComparativeExpressionContext context)
+    {
+        var left = Visit(context.expression(0));
+        var right = Visit(context.expression(1));
+        var op = context.compareOp().GetText();
+
+        left = isVariable(left);
+        right = isVariable(right);
+
+        return op switch
+        {
+            "<" => LesserThan(left, right),
+            ">" => GreaterThan(left, right),
+            "<=" => LesserThanOrEqualTo(left, right),
+            ">=" => GreaterThanOrEqualTo(left, right),
+            "==" => Equal(left, right),
+            "<>" => NotEqual(left, right),
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    public override object? VisitBoolParethesizedExpression([NotNull] CodeParser.BoolParethesizedExpressionContext context)
+    {
+        return Visit(context.expression())!;
+    }
+
+    public override object? VisitSwitchBlock([NotNull] SwitchBlockContext context)
+    {
+        var expression = Visit(context.expression());
+
+        return expression!;
+    }
+
+    public override object? VisitForBlock([NotNull] ForBlockContext context)
+    {
+        try
+        {
+            for (Visit(context.assignment()); (bool)Visit(context.boolExpression())!; Visit(context.executable()))
+            {
+                Visit(context.forBody());
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+        return null!;
+    }
+
+    private object? isVariable(object? obj)
+    {
+        if (obj is Variable var)
+        {
+            if (_variables.Any(p => p.Identifier == var.Identifier))
+            {
+                var variable = _variables.Find(p => p.Identifier == var.Identifier)!;
+                return variable.Value;
+            }
+            else
+            {
+                throw new Exception($"Undefined variable {var}");
+            }
+        }
+        return obj;
+    }
+
+    private object? Add(object? left, object? right)
     {
 
         if (left is int l && right is int r)
             return l + r;
-        
+
         if (left is float lf && right is float rf)
             return lf + rf;
 
-        //if (left is int lInt && right is float rfloat)
-        //    return lInt + rfloat;
-        
-        //if (left is float lFloat && right is int rInt)
-        //    return lFloat + rInt;
+        if (left is int li1 && right is float rf1)
+            return li1 + rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 + ri2;
 
         throw new Exception($"Cannot add values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
-    private object? Subtract (object? left, object? right)
+    private object? Subtract(object? left, object? right)
     {
         left = isVariable(left);
         right = isVariable(right);
 
         if (left is int l && right is int r)
             return l - r;
-        
+
         if (left is float lf && right is float rf)
             return lf - rf;
 
-        //if (left is int lInt && right is float rfloat)
-        //    return lInt - rfloat;
-        
-        //if (left is float lFloat && right is int rInt)
-        //    return lFloat - rInt;
+        if (left is int li1 && right is float rf1)
+            return li1 - rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 - ri2;
 
         throw new Exception($"Cannot subtract values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
-    private object? Multiply (object? left, object? right)
+    private object? Multiply(object? left, object? right)
     {
 
         if (left is int l && right is int r)
             return l * r;
-        
+
         if (left is float lf && right is float rf)
             return lf * rf;
 
-        //if (left is int lInt && right is float rfloat)
-        //    return lInt * rfloat;
-        
-        //if (left is float lFloat && right is int rInt)
-        //    return lFloat * rInt;
+        if (left is int li1 && right is float rf1)
+            return li1 * rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 * ri2;
 
         throw new Exception($"Cannot multiply values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
-    private object? Divide (object? left, object? right)
+    private object? Divide(object? left, object? right)
     {
 
         if (left is int l && right is int r)
@@ -527,29 +709,29 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is float lf && right is float rf)
             return lf / rf;
 
-        //if (left is int lInt && right is float rfloat)
-        //    return lInt / rfloat;
-        
-        //if (left is float lFloat && right is int rInt)
-        //    return lFloat / rInt;
+        if (left is int li1 && right is float rf1)
+            return li1 / rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 / ri2;
 
         throw new Exception($"Cannot divide values of types {left?.GetType()} and {right?.GetType()}.");
     }
 
-    private object? Modulo (object? left, object? right)
+    private object? Modulo(object? left, object? right)
     {
 
         if (left is int l && right is int r)
             return l % r;
-        
+
         if (left is float lf && right is float rf)
             return lf % rf;
 
-        //if (left is int lInt && right is float rfloat)
-        //    return lInt % rfloat;
-        
-        //if (left is float lFloat && right is int rInt)
-        //    return lFloat % rInt;
+        if (left is int li1 && right is float rf1)
+            return li1 % rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 % ri2;
 
         throw new Exception($"Cannot modulo values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -559,8 +741,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l < r;
-        if(left is float lf && right is float rf)
+
+        if (left is float lf && right is float rf)
             return lf < rf;
+
+        if (left is int li1 && right is float rf1)
+            return li1 < rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 < ri2;
 
         throw new Exception($"Cannot < values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -570,8 +759,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l > r;
+
         if (left is float lf && right is float rf)
             return lf > rf;
+
+        if (left is int li1 && right is float rf1)
+            return li1 > rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 > ri2;
 
         throw new Exception($"Cannot > values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -581,8 +777,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l >= r;
+
         if (left is float lf && right is float rf)
             return lf >= rf;
+
+        if (left is int li1 && right is float rf1)
+            return li1 >= rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 >= ri2;
 
         throw new Exception($"Cannot >= values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -592,8 +795,15 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l <= r;
+
         if (left is float lf && right is float rf)
             return lf <= rf;
+
+        if (left is int li1 && right is float rf1)
+            return li1 <= rf1;
+
+        if (left is float lf2 && right is int ri2)
+            return lf2 <= ri2;
 
         throw new Exception($"Cannot <= values of types {left?.GetType()} and {right?.GetType()}.");
     }
@@ -603,11 +813,14 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l == r;
+
         if (left is float lf && right is float rf)
             return lf == rf;
+
         if (left is char lc && right is char rc)
             return lc == rc;
-        if(left is bool lb && right is bool rb)
+
+        if (left is bool lb && right is bool rb)
             return lb == rb;
 
         throw new Exception($"Cannot compare equal values of types {left?.GetType()} and {right?.GetType()}.");
@@ -618,10 +831,13 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
         if (left is int l && right is int r)
             return l != r;
+
         if (left is float lf && right is float rf)
             return lf != rf;
+
         if (left is char lc && right is char rc)
             return lc != rc;
+
         if (left is bool lb && right is bool rb)
             return lb != rb;
 
@@ -662,16 +878,5 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         {
             throw new ArgumentException("INVALID DATA TYPE");
         }
-    }
-
-    private object? isVariable(object? obj)
-    {
-        if (obj is Variable var)
-        {
-            if (!(_variables.Any(p => p.Identifier == var.Identifier)))
-                throw new Exception($"Undefined varible {var}");
-            obj = var.Value;
-        }
-        return obj;
     }
 }
