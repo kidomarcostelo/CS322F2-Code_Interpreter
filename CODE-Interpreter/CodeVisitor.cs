@@ -626,6 +626,18 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         }
         return null!;
     }
+    private bool NOTLogic(object? logic)
+    {
+        logic = isVariable(logic);
+        if (logic is bool b)
+        {
+            return !b;
+        }
+        else
+        {
+            throw new ArgumentException("INVALID DATA TYPE");
+        }
+    }
 
     private object? isVariable(object? obj)
     {
@@ -861,18 +873,6 @@ public class CodeVisitor : CodeBaseVisitor<object?>
         if (left is bool && right is bool)
         {
             return (bool)left || (bool)right;
-        }
-        else
-        {
-            throw new ArgumentException("INVALID DATA TYPE");
-        }
-    }
-
-    public static object NOTLogic(object? logic)
-    {
-        if (logic is bool b)
-        {
-            return !b;
         }
         else
         {
