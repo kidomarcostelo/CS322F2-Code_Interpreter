@@ -870,11 +870,19 @@ public class CodeVisitor : CodeBaseVisitor<object?>
 
     public static object NOTLogic(object? logic)
     {
-        if (logic is bool b)
+        if (logic is Variable b)
         {
-            return !b;
+            if (b.Value is bool bl)
+            {
+                if (b.Value != "TRUE")
+                {
+                    return false;
+                }
+                return true;
+            }
+            return null;
         }
-        else
+        else 
         {
             throw new ArgumentException("INVALID DATA TYPE");
         }
